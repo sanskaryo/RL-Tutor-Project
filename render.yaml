@@ -1,0 +1,21 @@
+# Render.com Deployment Configuration
+# https://render.com/docs/yaml-spec
+
+services:
+  # Backend API Service
+  - type: web
+    name: jee-rl-tutor-backend
+    runtime: python
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///./rl_tutor.db
+      - key: FRONTEND_URL
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /api/v1/analytics/dashboard
+    plan: free

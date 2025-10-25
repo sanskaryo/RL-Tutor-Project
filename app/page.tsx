@@ -1,65 +1,89 @@
-import Image from "next/image";
+'use client';
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useAuth } from "./contexts/AuthContext";
+import { Brain, Sparkles, TrendingUp, Award } from "lucide-react";
 
 export default function Home() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    // Redirect to dashboard if already logged in
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-black text-white flex items-center justify-center relative overflow-hidden">
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-blue-900/20" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
+
+      {/* Content */}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-20 text-center">
+        {/* Logo/Icon */}
+        <div className="flex justify-center mb-8">
+          <div className="relative">
+            <div className="absolute inset-0 bg-purple-500/30 blur-3xl rounded-full" />
+            <Brain className="w-24 h-24 text-purple-400 relative animate-pulse" />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Main Heading */}
+        <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+          RL Tutor
+        </h1>
+
+        <p className="text-xl md:text-2xl text-gray-300 mb-4">
+          AI-Powered Adaptive Learning for JEE
+        </p>
+
+        <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
+          Master Physics, Chemistry, and Mathematics with personalized learning paths
+          powered by Reinforcement Learning algorithms.
+        </p>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <Link
+            href="/register"
+            className="px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-purple-500/50"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Get Started Free
+          </Link>
+          <Link
+            href="/login"
+            className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg font-semibold text-lg hover:bg-white/20 transition-all duration-200"
           >
-            Documentation
-          </a>
+            Sign In
+          </Link>
         </div>
-      </main>
+
+        {/* Features */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:border-purple-500/50 transition-all duration-200">
+            <Sparkles className="w-8 h-8 text-purple-400 mb-3 mx-auto" />
+            <h3 className="font-semibold mb-2">Adaptive Learning</h3>
+            <p className="text-sm text-gray-400">Questions adapt to your skill level in real-time</p>
+          </div>
+
+          <div className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:border-blue-500/50 transition-all duration-200">
+            <TrendingUp className="w-8 h-8 text-blue-400 mb-3 mx-auto" />
+            <h3 className="font-semibold mb-2">Track Progress</h3>
+            <p className="text-sm text-gray-400">Detailed analytics and performance insights</p>
+          </div>
+
+          <div className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:border-amber-500/50 transition-all duration-200">
+            <Award className="w-8 h-8 text-amber-400 mb-3 mx-auto" />
+            <h3 className="font-semibold mb-2">Earn Rewards</h3>
+            <p className="text-sm text-gray-400">Unlock badges and achievements as you learn</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

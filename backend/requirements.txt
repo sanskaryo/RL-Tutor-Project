@@ -1,0 +1,31 @@
+# FastAPI Backend Requirements
+# RL-Based Educational Tutor
+
+# Core Framework
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# Database
+sqlalchemy
+
+# Authentication & Security
+python-jose[cryptography]
+python-multipart
+bcrypt==4.1.2
+
+# ML & RL
+numpy
+pandas
+scikit-learn
+
+# Utilities
+python-dotenv
+httpx
+slowapi
+email-validator
+
+# Testing
+pytest
+requests

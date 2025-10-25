@@ -1,0 +1,529 @@
+{
+    "quiz_title": "VARK Learning Style Assessment",
+    "description": "Discover your preferred learning style: Visual, Auditory, Reading/Writing, or Kinesthetic",
+    "instructions": "Choose the option that best describes how you prefer to learn. There are no right or wrong answers.",
+    "questions": [
+        {
+            "id": 1,
+            "text": "When I learn something new, I prefer to:",
+            "options": [
+                {
+                    "text": "Watch a demonstration or see diagrams",
+                    "style": "V"
+                },
+                {
+                    "text": "Listen to someone explain it",
+                    "style": "A"
+                },
+                {
+                    "text": "Read instructions or articles about it",
+                    "style": "R"
+                },
+                {
+                    "text": "Try it out myself with hands-on practice",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "text": "When I study, I find it most helpful to:",
+            "options": [
+                {
+                    "text": "Use color-coded notes and highlighters",
+                    "style": "V"
+                },
+                {
+                    "text": "Discuss topics with others or listen to lectures",
+                    "style": "A"
+                },
+                {
+                    "text": "Write detailed summaries and make lists",
+                    "style": "R"
+                },
+                {
+                    "text": "Do practice problems or build physical models",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "text": "I remember things best when:",
+            "options": [
+                {
+                    "text": "I can visualize them in my mind or see pictures",
+                    "style": "V"
+                },
+                {
+                    "text": "I hear them explained or talk them through",
+                    "style": "A"
+                },
+                {
+                    "text": "I read and write about them multiple times",
+                    "style": "R"
+                },
+                {
+                    "text": "I physically engage with the material",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "text": "When following directions, I prefer:",
+            "options": [
+                {
+                    "text": "Maps, diagrams, or visual guides",
+                    "style": "V"
+                },
+                {
+                    "text": "Verbal instructions or audio directions",
+                    "style": "A"
+                },
+                {
+                    "text": "Written step-by-step instructions",
+                    "style": "R"
+                },
+                {
+                    "text": "To just start and figure it out as I go",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "text": "In a classroom, I learn best through:",
+            "options": [
+                {
+                    "text": "Presentations with slides and visual aids",
+                    "style": "V"
+                },
+                {
+                    "text": "Lectures and class discussions",
+                    "style": "A"
+                },
+                {
+                    "text": "Reading textbooks and taking notes",
+                    "style": "R"
+                },
+                {
+                    "text": "Lab work and hands-on activities",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "text": "When I need to explain something to someone:",
+            "options": [
+                {
+                    "text": "I draw pictures or diagrams",
+                    "style": "V"
+                },
+                {
+                    "text": "I explain it verbally",
+                    "style": "A"
+                },
+                {
+                    "text": "I write it down or send them a document",
+                    "style": "R"
+                },
+                {
+                    "text": "I show them how to do it",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "text": "I prefer teachers/instructors who use:",
+            "options": [
+                {
+                    "text": "Lots of charts, graphs, and visual examples",
+                    "style": "V"
+                },
+                {
+                    "text": "Clear verbal explanations and discussions",
+                    "style": "A"
+                },
+                {
+                    "text": "Textbooks, handouts, and written materials",
+                    "style": "R"
+                },
+                {
+                    "text": "Demonstrations and practical activities",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "text": "When I'm trying to concentrate, I'm most distracted by:",
+            "options": [
+                {
+                    "text": "Messy or cluttered visual environments",
+                    "style": "V"
+                },
+                {
+                    "text": "Noise and sounds around me",
+                    "style": "A"
+                },
+                {
+                    "text": "Having nothing to read or write",
+                    "style": "R"
+                },
+                {
+                    "text": "Having to sit still for too long",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "text": "When using technology for learning, I prefer:",
+            "options": [
+                {
+                    "text": "Video tutorials and infographics",
+                    "style": "V"
+                },
+                {
+                    "text": "Podcasts and audio lectures",
+                    "style": "A"
+                },
+                {
+                    "text": "E-books and written articles",
+                    "style": "R"
+                },
+                {
+                    "text": "Interactive simulations and apps",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "text": "I find it easiest to remember:",
+            "options": [
+                {
+                    "text": "Faces and visual details",
+                    "style": "V"
+                },
+                {
+                    "text": "Names and conversations",
+                    "style": "A"
+                },
+                {
+                    "text": "Facts and written information",
+                    "style": "R"
+                },
+                {
+                    "text": "Experiences and what I've done",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "text": "When problem-solving, I tend to:",
+            "options": [
+                {
+                    "text": "Visualize the problem and solutions",
+                    "style": "V"
+                },
+                {
+                    "text": "Talk through options with others",
+                    "style": "A"
+                },
+                {
+                    "text": "Make lists of pros and cons",
+                    "style": "R"
+                },
+                {
+                    "text": "Try different approaches and see what works",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "text": "I enjoy activities that involve:",
+            "options": [
+                {
+                    "text": "Looking at art, photos, or beautiful designs",
+                    "style": "V"
+                },
+                {
+                    "text": "Listening to music or engaging conversations",
+                    "style": "A"
+                },
+                {
+                    "text": "Reading books or writing creatively",
+                    "style": "R"
+                },
+                {
+                    "text": "Sports, dancing, or building things",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 13,
+            "text": "When preparing for a test, I:",
+            "options": [
+                {
+                    "text": "Create mind maps or flashcards with images",
+                    "style": "V"
+                },
+                {
+                    "text": "Record myself and listen back or study with friends",
+                    "style": "A"
+                },
+                {
+                    "text": "Re-read my notes and make study guides",
+                    "style": "R"
+                },
+                {
+                    "text": "Do practice tests and apply concepts",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 14,
+            "text": "In my free time, I prefer to:",
+            "options": [
+                {
+                    "text": "Watch movies, browse Pinterest, or play visual games",
+                    "style": "V"
+                },
+                {
+                    "text": "Listen to podcasts, music, or have conversations",
+                    "style": "A"
+                },
+                {
+                    "text": "Read books, blogs, or write in a journal",
+                    "style": "R"
+                },
+                {
+                    "text": "Do physical activities or make things",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 15,
+            "text": "When learning a new software or app, I:",
+            "options": [
+                {
+                    "text": "Watch video tutorials",
+                    "style": "V"
+                },
+                {
+                    "text": "Ask someone to explain how it works",
+                    "style": "A"
+                },
+                {
+                    "text": "Read the manual or help documentation",
+                    "style": "R"
+                },
+                {
+                    "text": "Jump in and explore by clicking around",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 16,
+            "text": "I express myself best through:",
+            "options": [
+                {
+                    "text": "Art, photography, or visual presentations",
+                    "style": "V"
+                },
+                {
+                    "text": "Speaking, singing, or verbal communication",
+                    "style": "A"
+                },
+                {
+                    "text": "Writing, texting, or email",
+                    "style": "R"
+                },
+                {
+                    "text": "Actions, gestures, or physical demonstrations",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 17,
+            "text": "When organizing information, I prefer to use:",
+            "options": [
+                {
+                    "text": "Charts, timelines, or visual organizers",
+                    "style": "V"
+                },
+                {
+                    "text": "Recording voice memos or discussing with others",
+                    "style": "A"
+                },
+                {
+                    "text": "Outlines, bullet points, or written lists",
+                    "style": "R"
+                },
+                {
+                    "text": "Sorting physical objects or arranging spaces",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 18,
+            "text": "I understand concepts better when they're presented with:",
+            "options": [
+                {
+                    "text": "Diagrams, illustrations, or demonstrations",
+                    "style": "V"
+                },
+                {
+                    "text": "Verbal explanations and discussions",
+                    "style": "A"
+                },
+                {
+                    "text": "Detailed written descriptions",
+                    "style": "R"
+                },
+                {
+                    "text": "Hands-on examples I can try",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 19,
+            "text": "When I'm bored in a meeting or lecture, I tend to:",
+            "options": [
+                {
+                    "text": "Doodle or look around the room",
+                    "style": "V"
+                },
+                {
+                    "text": "Listen to background sounds or tap rhythms",
+                    "style": "A"
+                },
+                {
+                    "text": "Take excessive notes or write to-do lists",
+                    "style": "R"
+                },
+                {
+                    "text": "Fidget, tap my foot, or want to move around",
+                    "style": "K"
+                }
+            ]
+        },
+        {
+            "id": 20,
+            "text": "I feel most confident when I've:",
+            "options": [
+                {
+                    "text": "Seen it done and can picture the steps",
+                    "style": "V"
+                },
+                {
+                    "text": "Heard clear instructions and discussed it",
+                    "style": "A"
+                },
+                {
+                    "text": "Read thorough documentation and made notes",
+                    "style": "R"
+                },
+                {
+                    "text": "Practiced it multiple times myself",
+                    "style": "K"
+                }
+            ]
+        }
+    ],
+    "style_descriptions": {
+        "V": {
+            "name": "Visual Learner",
+            "description": "You learn best through seeing. Diagrams, charts, videos, and color-coded notes help you understand and remember information.",
+            "strengths": [
+                "Remembering faces",
+                "Spatial awareness",
+                "Noticing visual details",
+                "Following visual instructions"
+            ],
+            "study_tips": [
+                "Use mind maps and diagrams",
+                "Watch video tutorials",
+                "Use different colors in notes",
+                "Visualize concepts"
+            ]
+        },
+        "A": {
+            "name": "Auditory Learner",
+            "description": "You learn best through listening and speaking. Lectures, discussions, and audio materials help you understand and retain information.",
+            "strengths": [
+                "Remembering names",
+                "Following verbal instructions",
+                "Noticing tone changes",
+                "Explaining concepts verbally"
+            ],
+            "study_tips": [
+                "Record and listen to lectures",
+                "Discuss with study groups",
+                "Read notes aloud",
+                "Use mnemonic songs"
+            ]
+        },
+        "R": {
+            "name": "Reading/Writing Learner",
+            "description": "You learn best through words. Reading texts, writing notes, and creating written summaries help you process information.",
+            "strengths": [
+                "Understanding written information",
+                "Taking detailed notes",
+                "Writing essays",
+                "Following written instructions"
+            ],
+            "study_tips": [
+                "Rewrite notes multiple times",
+                "Create written summaries",
+                "Read extensively",
+                "Make lists and outlines"
+            ]
+        },
+        "K": {
+            "name": "Kinesthetic Learner",
+            "description": "You learn best through doing and experiencing. Hands-on activities, practice, and physical engagement help you understand concepts.",
+            "strengths": [
+                "Learning by doing",
+                "Physical coordination",
+                "Hands-on problem solving",
+                "Remembering experiences"
+            ],
+            "study_tips": [
+                "Do practice problems",
+                "Use physical objects",
+                "Take frequent breaks to move",
+                "Apply concepts in real situations"
+            ]
+        },
+        "Multimodal": {
+            "name": "Multimodal Learner",
+            "description": "You don't have a single dominant learning style. You're flexible and can learn effectively through multiple methods depending on the situation.",
+            "strengths": [
+                "Adaptability",
+                "Using varied approaches",
+                "Learning in different contexts",
+                "Versatile study methods"
+            ],
+            "study_tips": [
+                "Combine multiple methods",
+                "Adapt to the content type",
+                "Use variety to stay engaged",
+                "Experiment with different techniques"
+            ]
+        }
+    }
+}

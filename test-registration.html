@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #fff;
+            border-radius: 4px;
+        }
+
+        button {
+            background: #0070f3;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0051cc;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .success {
+            background: #10b981;
+            display: block !important;
+        }
+
+        .error {
+            background: #ef4444;
+            display: block !important;
+        }
+
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Test Registration API</h1>
+    <p>Backend: <span id="apiUrl">http://localhost:8000/api/v1</span></p>
+
+    <form id="registerForm">
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="email" value="test@example.com" required>
+        </div>
+
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="username" value="testuser" required>
+        </div>
+
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="password" value="test123" required>
+        </div>
+
+        <div class="form-group">
+            <label>Full Name (optional):</label>
+            <input type="text" id="fullName" value="Test User">
+        </div>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        const resultDiv = document.getElementById('result');
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullName').value;
+
+            const data = {
+                email,
+                username,
+                password,
+                full_name: fullName || undefined
+            };
+
+            resultDiv.className = '';
+            resultDiv.style.display = 'none';
+            resultDiv.innerHTML = '<p>Sending request...</p>';
+
+            try {
+                console.log('Sending registration request:', data);
+
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                console.log('Response status:', response.status);
+
+                const result = await response.json();
+                console.log('Response data:', result);
+
+                if (!response.ok) {
+                    throw new Error(result.detail || `HTTP ${response.status}`);
+                }
+
+                resultDiv.className = 'success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Registration Successful!</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                    <p>Access Token: ${result.access_token.substring(0, 50)}...</p>
+                `;
+
+            } catch (error) {
+                console.error('Registration error:', error);
+
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Registration Failed</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <pre>${error.stack || error}</pre>
+                `;
+            }
+        });
+
+        // Test backend connection on load
+        fetch(`${API_BASE}/../health`)
+            .then(r => r.json())
+            .then(data => console.log('✅ Backend health check:', data))
+            .catch(err => console.error('❌ Backend connection failed:', err));
+    </script>
+</body>
+
+</html>

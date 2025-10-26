@@ -1,0 +1,179 @@
+"""
+Gemini LLM Client - Interface for Google Gemini chat models
+"""
+import google.generativeai as genai
+from typing import List, Dict, Any, Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class GeminiClient:
+    """
+    Wrapper for Google Gemini chat API.
+    Provides chat completion and generation capabilities.
+    """
+    
+    def __init__(
+        self, 
+        api_key: str, 
+        model: str = "gemini-1.5-flash",
+        temperature: float = 0.7,
+        max_tokens: int = 2048
+    ):
+        """
+        Initialize the Gemini client.
+        
+        Args:
+            api_key: Google Gemini API key
+            model: Model name to use
+            temperature: Sampling temperature (0-1)
+            max_tokens: Maximum tokens in response
+        """
+        genai.configure(api_key=api_key)
+        
+        self.model_name = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        
+        # Initialize the model
+        self.model = genai.GenerativeModel(
+            model_name=model,
+            generation_config={
+                "temperature": temperature,
+                "max_output_tokens": max_tokens
+            }
+        )
+        
+        logger.info(f"Initialized GeminiClient with model: {model}")
+    
+    def generate(
+        self, 
+        prompt: str,
+        system_instruction: Optional[str] = None
+    ) -> str:
+        """
+        Generate text from a prompt.
+        
+        Args:
+            prompt: User prompt
+            system_instruction: Optional system instruction
+        
+        Returns:
+            Generated text
+        """
+        try:
+            # If system instruction provided, create new model with it
+            if system_instruction:
+                model = genai.GenerativeModel(
+                    model_name=self.model_name,
+                    generation_config={
+                        "temperature": self.temperature,
+                        "max_output_tokens": self.max_tokens
+                    },
+                    system_instruction=system_instruction
+                )
+            else:
+                model = self.model
+            
+            # Generate response
+            response = model.generate_content(prompt)
+            return response.text
+        
+        except Exception as e:
+            logger.error(f"Error generating text: {e}")
+            raise
+    
+    def chat(
+        self, 
+        messages: List[Dict[str, str]],
+        system_instruction: Optional[str] = None
+    ) -> str:
+        """
+        Multi-turn chat conversation.
+        
+        Args:
+            messages: List of message dicts with 'role' and 'content'
+            system_instruction: Optional system instruction
+        
+        Returns:
+            Assistant's response
+        """
+        try:
+            # Create model with system instruction if provided
+            if system_instruction:
+                model = genai.GenerativeModel(
+                    model_name=self.model_name,
+                    generation_config={
+                        "temperature": self.temperature,
+                        "max_output_tokens": self.max_tokens
+                    },
+                    system_instruction=system_instruction
+                )
+            else:
+                model = self.model
+            
+            # Start chat session
+            chat = model.start_chat(history=[])
+            
+            # Add previous messages to history (except the last one)
+            for msg in messages[:-1]:
+                if msg["role"] == "user":
+                    chat.send_message(msg["content"])
+            
+            # Send final message and get response
+            last_message = messages[-1]["content"]
+            response = chat.send_message(last_message)
+            
+            return response.text
+        
+        except Exception as e:
+            logger.error(f"Error in chat: {e}")
+            raise
+    
+    def generate_with_context(
+        self,
+        question: str,
+        context: str,
+        system_instruction: str
+    ) -> str:
+        """
+        Generate answer based on provided context (for RAG).
+        
+        Args:
+            question: User's question
+            context: Retrieved context from documents
+            system_instruction: System instruction for behavior
+        
+        Returns:
+            Generated answer
+        """
+        # Construct prompt with context
+        prompt = f"""
+Context from JEE study materials:
+{context}
+
+Student's Question: {question}
+
+Please provide a detailed answer based ONLY on the context provided above.
+"""
+        
+        return self.generate(prompt, system_instruction=system_instruction)
+    
+    def count_tokens(self, text: str) -> int:
+        """
+        Count tokens in text.
+        
+        Args:
+            text: Text to count tokens for
+        
+        Returns:
+            Number of tokens
+        """
+        try:
+            result = self.model.count_tokens(text)
+            return result.total_tokens
+        except Exception as e:
+            logger.error(f"Error counting tokens: {e}")
+            # Rough estimate: 1 token ≈ 4 characters
+            return len(text) // 4

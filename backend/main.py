@@ -10,7 +10,8 @@ from app.core.config import settings
 from app.core.database import init_db
 from app.api import (
     auth, session, analytics, learning_style, students, 
-    recommendations, skill_gaps, learning_pace, smart_recommendations, mastery
+    recommendations, skill_gaps, learning_pace, smart_recommendations, mastery,
+    doubt_solver  # New: RAG-powered doubt solver
 )
 
 # Initialize rate limiter
@@ -48,6 +49,7 @@ app.include_router(skill_gaps.router, prefix=settings.API_V1_STR)
 app.include_router(learning_pace.router, prefix=settings.API_V1_STR)
 app.include_router(smart_recommendations.router, prefix=settings.API_V1_STR)
 app.include_router(mastery.router, prefix=settings.API_V1_STR)
+app.include_router(doubt_solver.router, prefix=settings.API_V1_STR)  # New: Doubt Solver
 
 
 @app.on_event("startup")

@@ -38,6 +38,12 @@ class Settings(BaseSettings):
     LEARNING_RATE: float = 0.1
     DISCOUNT_FACTOR: float = 0.95
     
+    # AI/LLM Settings (New for RAG and Doubt Solver)
+    GEMINI_API_KEY: Optional[str] = None
+    MONGODB_URI: Optional[str] = None
+    MONGODB_DB_NAME: str = "jee_tutor"
+    MONGODB_COLLECTION_NAME: str = "document_chunks"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

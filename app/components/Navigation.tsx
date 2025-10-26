@@ -24,6 +24,7 @@ export default function Navigation() {
         { name: 'Analytics', href: '/analytics', icon: BarChart3 },
         { name: 'Skill Gaps', href: '/skill-gaps', icon: Target },
         { name: 'Learning Pace', href: '/learning-pace', icon: Timer },
+        { name: 'AI Chat', href: '/chat', icon: Brain },
     ];
 
     // Navigation items for non-authenticated users

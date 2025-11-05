@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "RL Educational Tutor"
     
     # Server Settings
-    PORT: int = 8001
+    PORT: int = 8002
     HOST: str = "0.0.0.0"
     
     # Database

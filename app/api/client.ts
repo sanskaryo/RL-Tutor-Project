@@ -3,7 +3,8 @@
  * Base URL configured via environment variables
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002/api/v1';
+// Ensure no trailing slash in the base URL
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002/api/v1').replace(/\/+$/, '');
 
 // ==================== TYPES ====================
 export interface RegisterData {

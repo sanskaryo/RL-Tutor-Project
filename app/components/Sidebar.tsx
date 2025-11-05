@@ -46,6 +46,8 @@ export default function Sidebar({ children }: SidebarProps) {
         { name: 'Study Plan', href: '/study-plan', icon: Calendar },
         { name: 'RL Viz', href: '/rl-viz', icon: Brain },
         { name: 'Learning Style', href: '/learning-style-quiz', icon: Sparkles },
+        { name: 'Doubt Solver', href: '/doubt-solver', icon: Brain },
+        { name: 'Mind Map', href: '/mindmap', icon: Brain },
     ];
 
     const isActive = (href: string) => pathname === href;

@@ -93,7 +93,7 @@ This will:
 
 After loading, check:
 ```bash
-curl http://localhost:8001/api/v1/doubt/stats
+curl http://localhost:8002/api/v1/doubt/stats
 ```
 
 Should show:

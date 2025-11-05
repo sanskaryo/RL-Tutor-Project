@@ -169,7 +169,7 @@ def main():
     logger.info("1. Verify data in MongoDB Atlas UI")
     logger.info("2. Check vector index status (should be 'Active')")
     logger.info("3. Start the backend server: uvicorn main:app --reload")
-    logger.info("4. Test the API: curl http://localhost:8001/api/v1/doubt/stats")
+    logger.info("4. Test the API: curl http://localhost:8002/api/v1/doubt/stats")
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ from app.core.database import init_db
 from app.api import (
     auth, session, analytics, learning_style, students, 
     recommendations, skill_gaps, learning_pace, smart_recommendations, mastery,
-    doubt_solver  # New: RAG-powered doubt solver
+    doubt_solver, mindmap  # New: RAG-powered doubt solver and mind map
 )
 
 # Initialize rate limiter
@@ -50,14 +50,15 @@ app.include_router(learning_pace.router, prefix=settings.API_V1_STR)
 app.include_router(smart_recommendations.router, prefix=settings.API_V1_STR)
 app.include_router(mastery.router, prefix=settings.API_V1_STR)
 app.include_router(doubt_solver.router, prefix=settings.API_V1_STR)  # New: Doubt Solver
+app.include_router(mindmap.router, prefix=settings.API_V1_STR)  # New: Mind Map
 
 
 @app.on_event("startup")
 def startup_event():
     """Initialize database on startup"""
     init_db()
-    print("✅ Database initialized")
-    print(f"✅ Server starting on {settings.API_V1_STR}")
+    print("[+] Database initialized")
+    print(f"[+] Server starting on {settings.API_V1_STR}")
 
 
 @app.get("/")
@@ -78,4 +79,4 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8002, reload=True)

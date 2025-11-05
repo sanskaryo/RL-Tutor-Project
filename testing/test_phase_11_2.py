@@ -7,7 +7,7 @@ Tests all backend endpoints and verifies frontend page exists
 import requests
 import json
 
-BASE_URL = "http://localhost:8001/api/v1"
+BASE_URL = "http://localhost:8002/api/v1"
 
 def test_skill_gaps_phase():
     print("="*60)

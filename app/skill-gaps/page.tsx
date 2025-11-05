@@ -3,8 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import Sidebar from '@/app/components/Sidebar';
-import { Target, TrendingUp, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { AppLayout } from '@/components/app-layout';
+import { Target, TrendingUp, Clock, AlertTriangle, CheckCircle, RefreshCw, Sparkles, Award } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface SkillGap {
     id: number;
@@ -92,11 +96,11 @@ export default function SkillGapsPage() {
 
     const getSeverityColor = (severity: string) => {
         switch (severity.toLowerCase()) {
-            case 'critical': return 'text-red-400 bg-red-500/10 border-red-500/30';
-            case 'high': return 'text-orange-400 bg-orange-500/10 border-orange-500/30';
-            case 'medium': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30';
-            case 'low': return 'text-green-400 bg-green-500/10 border-green-500/30';
-            default: return 'text-gray-400 bg-gray-500/10 border-gray-500/30';
+            case 'critical': return 'text-destructive bg-destructive/10 border-destructive/30';
+            case 'high': return 'text-orange-600 dark:text-orange-400 bg-orange-500/10 border-orange-500/30';
+            case 'medium': return 'text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 border-yellow-500/30';
+            case 'low': return 'text-accent bg-accent/10 border-accent/30';
+            default: return 'text-muted-foreground bg-muted border-border';
         }
     };
 
@@ -116,165 +120,208 @@ export default function SkillGapsPage() {
 
     if (isLoading) {
         return (
-            <Sidebar>
-                <div className="min-h-screen bg-black text-white flex items-center justify-center">
+            <AppLayout title="Skill Gap Analysis" showBackButton>
+                <div className="flex items-center justify-center h-[calc(100vh-12rem)]">
                     <div className="text-center">
-                        <RefreshCw className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
-                        <p className="text-xl">Loading skill gaps...</p>
+                        <RefreshCw className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+                        <p className="text-lg text-muted-foreground">Loading skill gaps...</p>
                     </div>
                 </div>
-            </Sidebar>
+            </AppLayout>
         );
     }
 
     return (
-        <Sidebar>
-            <div className="min-h-screen bg-black text-white">
-            {/* Header */}
-            <div className="bg-gradient-to-b from-zinc-900 to-black border-b border-zinc-800">
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                                <Target className="w-8 h-8 text-purple-400" />
-                                Skill Gap Analysis
-                            </h1>
-                            <p className="text-gray-400">Identify and track your learning gaps with AI-powered insights</p>
+        <AppLayout title="Skill Gap Analysis" showBackButton>
+            <div className="container mx-auto max-w-7xl p-6">
+                {/* Header Card */}
+                <Card className="mb-6">
+                    <CardHeader>
+                        <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Target className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <CardTitle>Skill Gap Analysis</CardTitle>
+                                    <CardDescription>Identify and track your learning gaps with AI-powered insights</CardDescription>
+                                </div>
+                            </div>
+                            <Button
+                                onClick={analyzeGaps}
+                                disabled={isAnalyzing}
+                                className="gap-2"
+                            >
+                                <RefreshCw className={cn("w-4 h-4", isAnalyzing && "animate-spin")} />
+                                {isAnalyzing ? 'Analyzing...' : 'Analyze Gaps'}
+                            </Button>
                         </div>
-                        <button
-                            onClick={analyzeGaps}
-                            disabled={isAnalyzing}
-                            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <RefreshCw className={`w-5 h-5 ${isAnalyzing ? 'animate-spin' : ''}`} />
-                            {isAnalyzing ? 'Analyzing...' : 'Analyze Gaps'}
-                        </button>
-                    </div>
-                </div>
-            </div>
+                    </CardHeader>
+                </Card>
 
-            <div className="max-w-7xl mx-auto px-6 py-8">
                 {error && (
-                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">
-                        {error}
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-6"
+                    >
+                        <Card className="border-destructive/50 bg-destructive/10">
+                            <CardContent className="p-4">
+                                <p className="text-sm text-destructive">{error}</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
                 )}
 
                 {gaps.length === 0 ? (
-                    <div className="text-center py-16">
-                        <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center py-16"
+                    >
+                        <div className="p-4 bg-primary/10 rounded-full inline-block mb-4">
+                            <Target className="w-12 h-12 text-primary" />
+                        </div>
                         <h3 className="text-xl font-semibold mb-2">No skill gaps detected</h3>
-                        <p className="text-gray-400 mb-6">
+                        <p className="text-muted-foreground mb-6">
                             {isAnalyzing ? 'Analyzing your performance...' : 'Click "Analyze Gaps" to identify areas for improvement'}
                         </p>
-                    </div>
+                    </motion.div>
                 ) : (
                     <>
                         {/* Summary Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <Target className="w-6 h-6 text-purple-400" />
-                                    <h3 className="text-gray-400 text-sm">Total Gaps</h3>
-                                </div>
-                                <p className="text-3xl font-bold">{gaps.length}</p>
-                            </div>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <Target className="w-5 h-5 text-primary" />
+                                            <h3 className="text-sm text-muted-foreground">Total Gaps</h3>
+                                        </div>
+                                        <p className="text-3xl font-bold">{gaps.length}</p>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
 
-                            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <AlertTriangle className="w-6 h-6 text-red-400" />
-                                    <h3 className="text-gray-400 text-sm">Critical</h3>
-                                </div>
-                                <p className="text-3xl font-bold text-red-400">
-                                    {gaps.filter(g => g.severity.toLowerCase() === 'critical').length}
-                                </p>
-                            </div>
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <AlertTriangle className="w-5 h-5 text-destructive" />
+                                            <h3 className="text-sm text-muted-foreground">Critical</h3>
+                                        </div>
+                                        <p className="text-3xl font-bold text-destructive">
+                                            {gaps.filter(g => g.severity.toLowerCase() === 'critical').length}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
 
-                            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <Clock className="w-6 h-6 text-blue-400" />
-                                    <h3 className="text-gray-400 text-sm">Est. Time</h3>
-                                </div>
-                                <p className="text-3xl font-bold">
-                                    {gaps.reduce((sum, g) => sum + g.estimated_time_hours, 0)}h
-                                </p>
-                            </div>
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <Clock className="w-5 h-5 text-primary" />
+                                            <h3 className="text-sm text-muted-foreground">Est. Time</h3>
+                                        </div>
+                                        <p className="text-3xl font-bold">
+                                            {gaps.reduce((sum, g) => sum + g.estimated_time_hours, 0)}h
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
 
-                            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <TrendingUp className="w-6 h-6 text-green-400" />
-                                    <h3 className="text-gray-400 text-sm">Avg Progress</h3>
-                                </div>
-                                <p className="text-3xl font-bold text-green-400">
-                                    {Math.round(gaps.reduce((sum, g) => sum + g.progress, 0) / gaps.length)}%
-                                </p>
-                            </div>
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <TrendingUp className="w-5 h-5 text-accent" />
+                                            <h3 className="text-sm text-muted-foreground">Avg Progress</h3>
+                                        </div>
+                                        <p className="text-3xl font-bold text-accent">
+                                            {Math.round(gaps.reduce((sum, g) => sum + g.progress, 0) / gaps.length)}%
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
                         </div>
 
                         {/* Skill Gaps List */}
                         <div className="space-y-4">
                             <h2 className="text-2xl font-bold mb-4">Your Skill Gaps</h2>
-                            {gaps.sort((a, b) => b.priority - a.priority).map((gap) => (
-                                <div
-                                    key={gap.id}
-                                    className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-colors"
-                                >
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <h3 className="text-xl font-semibold">{gap.skill_name}</h3>
-                                                <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm border ${getSeverityColor(gap.severity)}`}>
-                                                    {getSeverityIcon(gap.severity)}
-                                                    {gap.severity}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                <span>Priority: {gap.priority}/10</span>
-                                                <span>•</span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-4 h-4" />
-                                                    {gap.estimated_time_hours}h estimated
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <AnimatePresence>
+                                {gaps.sort((a, b) => b.priority - a.priority).map((gap, index) => (
+                                    <motion.div
+                                        key={gap.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                    >
+                                        <Card className="hover:shadow-lg transition-shadow">
+                                            <CardContent className="p-6">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                            <h3 className="text-xl font-semibold">{gap.skill_name}</h3>
+                                                            <span className={cn("flex items-center gap-1 px-3 py-1 rounded-full text-xs border font-medium", getSeverityColor(gap.severity))}>
+                                                                {getSeverityIcon(gap.severity)}
+                                                                {gap.severity}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                                            <span>Priority: {gap.priority}/10</span>
+                                                            <span>•</span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Clock className="w-4 h-4" />
+                                                                {gap.estimated_time_hours}h estimated
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                    {/* Progress Bar */}
-                                    <div className="mb-4">
-                                        <div className="flex justify-between text-sm mb-2">
-                                            <span className="text-gray-400">Current: {gap.current_level}/10</span>
-                                            <span className="text-gray-400">Target: {gap.target_level}/10</span>
-                                        </div>
-                                        <div className="w-full bg-zinc-800 rounded-full h-3 overflow-hidden">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-purple-600 to-blue-600 transition-all duration-500"
-                                                style={{ width: `${gap.progress}%` }}
-                                            />
-                                        </div>
-                                        <p className="text-sm text-gray-400 mt-1">{gap.progress}% complete</p>
-                                    </div>
+                                                {/* Progress Bar */}
+                                                <div className="mb-4">
+                                                    <div className="flex justify-between text-sm mb-2">
+                                                        <span className="text-muted-foreground">Current: {gap.current_level}/10</span>
+                                                        <span className="text-muted-foreground">Target: {gap.target_level}/10</span>
+                                                    </div>
+                                                    <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${gap.progress}%` }}
+                                                            transition={{ duration: 1, delay: index * 0.1 + 0.3 }}
+                                                            className="h-full bg-gradient-to-r from-primary to-accent"
+                                                        />
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground mt-1">{gap.progress}% complete</p>
+                                                </div>
 
-                                    {/* Recommendations */}
-                                    {gap.recommendations && gap.recommendations.length > 0 && (
-                                        <div className="bg-zinc-900/50 rounded-lg p-4">
-                                            <h4 className="font-semibold mb-2 text-purple-400">Recommendations:</h4>
-                                            <ul className="space-y-1">
-                                                {gap.recommendations.map((rec, idx) => (
-                                                    <li key={idx} className="text-sm text-gray-300 flex items-start gap-2">
-                                                        <span className="text-purple-400 mt-1">•</span>
-                                                        <span>{rec}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                                                {/* Recommendations */}
+                                                {gap.recommendations && gap.recommendations.length > 0 && (
+                                                    <div className="bg-muted/50 rounded-lg p-4">
+                                                        <h4 className="font-semibold mb-2 text-primary flex items-center gap-2">
+                                                            <Award className="w-4 h-4" />
+                                                            Recommendations:
+                                                        </h4>
+                                                        <ul className="space-y-1">
+                                                            {gap.recommendations.map((rec, idx) => (
+                                                                <li key={idx} className="text-sm flex items-start gap-2">
+                                                                    <span className="text-primary mt-1">•</span>
+                                                                    <span>{rec}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
                     </>
                 )}
             </div>
-        </div>
-        </Sidebar>
+        </AppLayout>
     );
 }

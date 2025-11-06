@@ -18,6 +18,18 @@ out/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+.turbo/
+.cache/
+
+# Nested package managers and builds (any subproject)
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+**/.npm/
+**/.yarn/
+**/.pnpm/
 
 # IDE
 .vscode/
@@ -34,6 +46,10 @@ Thumbs.db
 .env
 .env.local
 .env*.local
+.env.development
+.env.test
+.env.production
+!.env.example
 
 # Database
 *.db
@@ -43,11 +59,26 @@ Thumbs.db
 # Logs
 *.log
 logs/
+**/*.log
 
 # Testing
 .pytest_cache/
 coverage/
 .coverage
+
+# Backend (Python) extras
+backend/.venv/
+backend/venv/
+backend/__pycache__/
+backend/**/*.pyc
+
+# Frontend (Vite app under web/)
+web/node_modules/
+web/dist/
+web/.vite/
+
+# Docker compose overrides (local only)
+docker-compose.override.yml
 
 # Documentation (not needed in container)
 *.md
@@ -56,3 +87,8 @@ coverage/
 # Git
 .git/
 .gitignore
+
+# Additional
+*.zip
+*.tar
+*.tar.gz

@@ -1,3 +1,223 @@
+# app/api/mindmap.py
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any
+import logging
+import json
+import re
+from datetime import datetime
+
+from app.core.config import settings
+from app.services.llm.gemini_client import GeminiClient
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/mindmap", tags=["Mind Map"])
+
+# Request & response models
+class MindMapRequest(BaseModel):
+    topic: str = Field(..., min_length=2, max_length=200, description="Topic for mind map")
+    subject: Optional[str] = Field(None, description="Subject context (e.g., Physics, Math)")
+    max_nodes: int = Field(8, ge=3, le=15, description="Maximum nodes")
+    include_examples: bool = Field(True, description="Include examples?")
+
+class MindMapNode(BaseModel):
+    id: str
+    label: str
+    summary: str
+    description: str
+    related_concepts: List[str]
+    examples: Optional[List[str]] = None
+    subject: Optional[str] = None
+    difficulty_level: str
+
+class MindMapEdge(BaseModel):
+    id: str
+    source: str
+    target: str
+    label: str
+    relationship_type: str
+
+class MindMapResponse(BaseModel):
+    nodes: List[MindMapNode]
+    edges: List[MindMapEdge]
+    topic: str
+    subject: Optional[str]
+    generated_at: str
+    mermaid_mindmap: Optional[str] = None
+
+# Dependency: create Gemini client or fallback mock
+def get_gemini_client():
+    api_key = getattr(settings, "GEMINI_API_KEY", None)
+    if not api_key:
+        # return mock client
+        class MockClient:
+            def generate(self, prompt: str, *args, **kwargs) -> str:
+                # very simple fallback JSON
+                return json.dumps({
+                    "nodes": [
+                        {
+                            "id": "root_node",
+                            "label": "Root Topic",
+                            "summary": "Overview of topic.",
+                            "description": "This is a fallback node.",
+                            "related_concepts": [],
+                            "examples": [],
+                            "subject": None,
+                            "difficulty_level": "beginner"
+                        }
+                    ],
+                    "edges": []
+                })
+        return MockClient()
+    return GeminiClient(api_key=api_key)
+
+def _fallback_mindmap(topic: str, subject: Optional[str]) -> Dict[str, Any]:
+    root_id = topic.lower().replace(" ", "_") or "topic_root"
+    nodes = [
+        {
+            "id": root_id,
+            "label": topic.title(),
+            "summary": f"Overview of {topic}.",
+            "description": f"{topic.title()} is a key concept in {subject or 'JEE'} preparation.",
+            "related_concepts": [],
+            "examples": [],
+            "subject": subject,
+            "difficulty_level": "intermediate"
+        }
+    ]
+    edges = []
+    mermaid = f"mindmap\n  root(({topic.title()}))\n"
+    return {"nodes": nodes, "edges": edges, "mermaid_mindmap": mermaid}
+
+def _extract_json_payload(raw: str) -> str:
+    if not raw:
+        raise ValueError("Empty response from LLM")
+    raw = raw.strip()
+    if raw.startswith("{") and raw.endswith("}"):
+        return raw
+    match = re.search(r"\{.*\}", raw, re.DOTALL)
+    if match:
+        return match.group()
+    raise ValueError("Could not extract JSON")
+
+@router.post("/generate", response_model=MindMapResponse)
+def generate_mindmap(
+    request: MindMapRequest,
+    gemini_client: GeminiClient = Depends(get_gemini_client)
+):
+    """
+    Generate a mind map using Gemini AI with fallback if parsing fails.
+    """
+    try:
+        # 1️⃣ Improved prompt — forces JSON output
+        prompt = f"""
+        You are an expert JEE tutor for Physics, Chemistry, and Math.
+        Create a clear mind map for the topic: "{request.topic}".
+        Subject: "{request.subject or 'General'}".
+        Limit total nodes to {request.max_nodes} and include examples: {request.include_examples}.
+
+        Respond **ONLY** with valid JSON like this:
+        {{
+          "nodes": [
+            {{
+              "id": "calculus_basics",
+              "label": "Calculus Basics",
+              "summary": "Fundamentals of limits and derivatives",
+              "description": "Covers continuity, differentiation and limits for JEE preparation.",
+              "related_concepts": ["limits", "continuity", "differentiation"],
+              "examples": ["lim x→0 sin(x)/x = 1", "d/dx(x^2) = 2x"],
+              "subject": "Math",
+              "difficulty_level": "intermediate"
+            }}
+          ],
+          "edges": [
+            {{
+              "id": "edge_1",
+              "source": "calculus_basics",
+              "target": "derivatives_intro",
+              "label": "prerequisite",
+              "relationship_type": "depends_on"
+            }}
+          ],
+          "mermaid_mindmap": "mindmap\\n  root(({request.topic}))\\n    concept((Subtopic))"
+        }}
+        """
+
+        print(f"[DEBUG] Sending prompt to Gemini for topic '{request.topic}'")
+
+        # 2️⃣ Call Gemini
+        raw = gemini_client.generate(prompt=prompt)
+        print("[DEBUG] Raw Gemini response preview:", raw[:400])
+
+        # 3️⃣ Try parsing JSON
+        try:
+            payload_str = _extract_json_payload(raw)
+            payload = json.loads(payload_str)
+            print(f"[DEBUG] ✅ JSON parsed successfully for '{request.topic}'")
+        except Exception as e:
+            print(f"[WARN] Gemini output invalid, using fallback. Error: {e}")
+            payload = _fallback_mindmap(request.topic, request.subject)
+
+        # 4️⃣ Extract fields
+        nodes_raw = payload.get("nodes", [])
+        edges_raw = payload.get("edges", [])
+        mermaid_raw = payload.get("mermaid_mindmap")
+
+        # 5️⃣ If Gemini didn’t give nodes, fallback
+        if not nodes_raw:
+            print("[WARN] No nodes detected, using fallback mindmap")
+            fallback = _fallback_mindmap(request.topic, request.subject)
+            nodes_raw = fallback["nodes"]
+            edges_raw = fallback["edges"]
+            mermaid_raw = fallback["mermaid_mindmap"]
+
+        # 6️⃣ Final response
+        response = MindMapResponse(
+            nodes=nodes_raw,
+            edges=edges_raw,
+            topic=request.topic,
+            subject=request.subject,
+            generated_at=datetime.utcnow().isoformat(),
+            mermaid_mindmap=mermaid_raw
+        )
+
+        print(f"[SUCCESS] ✅ Mind map generated for topic: {request.topic}")
+        return response
+
+    # except Exception as e:
+    #     logger.error(f"Error generating mind map: {e}")
+    #     # Raise a generic error without exposing sensitive details
+    #     raise HTTPException(status_code=500, detail="Mind map generation failed")
+    except Exception as e:
+        import traceback
+        logger.error("❌ Full error traceback:")
+        traceback.print_exc()
+        logger.error(f"[ERROR] Mind map generation failed: {e}")
+        # Raise a generic error without exposing internal details
+        raise HTTPException(status_code=500, detail="Mind map generation failed")
+
+@router.get("/topics/suggestions", response_model=Dict[str, Any])
+def get_suggestions():
+    return {"suggestions": [
+        {"topic": "Calculus", "subject": "Math"},
+        {"topic": "Organic Chemistry", "subject": "Chemistry"},
+        {"topic": "Electricity & Magnetism", "subject": "Physics"}
+    ]}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # """
 # Mind Map API - AI-powered concept visualization endpoint
 # """

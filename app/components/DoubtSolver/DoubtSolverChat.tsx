@@ -5,6 +5,7 @@ import { Send, Loader2, BookOpen, AlertCircle, Mic, MicOff, Volume2, VolumeX, Sp
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSpeechRecognition, useTextToSpeech } from '@/hooks/use-speech';
 import { Button } from '@/components/ui/button';
+import { api } from '@/app/api/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -75,64 +76,12 @@ export default function DoubtSolverChat() {
     setIsLoading(true);
 
     try {
-      const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002';
-      const baseUrl = rawBaseUrl.replace(/\/$/, ''); // remove trailing slash
-      const cleanedBaseUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-      const endpoint = `${cleanedBaseUrl}/v1/doubt/ask`;
-
       console.log('[DoubtSolverChat] sending request', {
-        rawBaseUrl,
-        baseUrl,
-        cleanedBaseUrl,
-        endpoint,
-        hasInput: Boolean(input.trim()),
+        input: input.trim(),
         selectedSubject: selectedSubject || null,
       });
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: input,
-          subject: selectedSubject || null,
-          context_limit: 3,
-          include_sources: true,
-        }),
-      });
-
-      console.log('[DoubtSolverChat] response metadata', {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText,
-        url: response.url,
-      });
-
-      if (!response.ok) {
-        let errorBody: string | undefined;
-        try {
-          errorBody = await response.text();
-        } catch (bodyReadError) {
-          console.error('[DoubtSolverChat] failed to read error body', bodyReadError);
-        }
-
-        console.error('[DoubtSolverChat] non-OK response', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorBody,
-        });
-
-        throw new Error(`Failed to get answer (status ${response.status})`);
-      }
-
-      let data: any;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        console.error('[DoubtSolverChat] failed to parse JSON response', parseError);
-        throw new Error('Invalid JSON received from API');
-      }
+      const data = await api.askDoubt(input.trim(), selectedSubject || null);
 
       if (!data || typeof data.answer !== 'string') {
         console.warn('[DoubtSolverChat] unexpected API response payload', data);

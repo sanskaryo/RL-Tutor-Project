@@ -1,0 +1,380 @@
+{
+  "files": [
+    ".dockerignore",
+    ".env.local",
+    "1.1.0",
+    "COMPLETE_IMPLEMENTATION_SUMMARY.md",
+    "COMPLETION_SUMMARY.md",
+    "Dockerfile",
+    "PHASE_1_2_IMPLEMENTATION.md",
+    "PHASE_3_4_IMPLEMENTATION.md",
+    "PROJECT_ANALYSIS.md",
+    "README.md",
+    "SETUP_GUIDE.md",
+    "TODO.txt",
+    "check_settings.py",
+    "dbverify.py",
+    "docker-compose.yml",
+    "eslint.config.mjs",
+    "list_project_structure.py",
+    "next-env.d.ts",
+    "next.config.ts",
+    "package-lock.json",
+    "package.json",
+    "postcss.config.mjs",
+    "render.yaml",
+    "tailwind.config.js",
+    "test-registration.html",
+    "test_postgres.py",
+    "tsconfig.json"
+  ],
+  "app": {
+    "files": [
+      "error.tsx",
+      "favicon.ico",
+      "globals.css",
+      "layout.tsx",
+      "loading.tsx",
+      "page.tsx",
+      "providers.tsx"
+    ],
+    "achievements": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "analytics": {
+      "files": [
+        "loading.tsx",
+        "page.tsx"
+      ]
+    },
+    "api": {
+      "files": [
+        "client.ts"
+      ],
+      "chat": {
+        "files": [
+          "route.ts"
+        ]
+      }
+    },
+    "chat": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "components": {
+      "files": [
+        "Navigation.tsx",
+        "Sidebar.tsx"
+      ],
+      "chat": {
+        "files": [
+          "Chat.tsx"
+        ]
+      },
+      "DoubtSolver": {
+        "files": [
+          "DoubtSolverChat.tsx"
+        ]
+      },
+      "MindMap": {
+        "files": [
+          "MindMapGenerator.new.tsx",
+          "MindMapGenerator.tsx",
+          "MindMapNode.tsx",
+          "MindMapWithLoading.tsx",
+          "mindmap-constants.ts"
+        ]
+      }
+    },
+    "contexts": {
+      "files": [
+        "AuthContext.tsx"
+      ]
+    },
+    "dashboard": {
+      "files": [
+        "error.tsx",
+        "loading.tsx",
+        "page.tsx"
+      ]
+    },
+    "demo": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "doubt-solver": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "flashcards": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "learn": {
+      "files": [
+        "loading.tsx",
+        "page.tsx"
+      ]
+    },
+    "learning-pace": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "learning-style-quiz": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "learning-style-results": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "login": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "mindmap": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "register": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "rl-viz": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "skill-gaps": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "skill-tree": {
+      "files": [
+        "page.tsx"
+      ]
+    },
+    "study-plan": {
+      "files": [
+        "page.tsx"
+      ]
+    }
+  },
+  "backend": {
+    "files": [
+      ".env.example",
+      "Dockerfile",
+      "JEE_QUESTIONS_ADDED.md",
+      "README.md",
+      "check_content.py",
+      "fly.toml",
+      "load_documents.py",
+      "main.py",
+      "mongocheck.py",
+      "populate_jee_questions.py",
+      "requirements.txt",
+      "rl_tutor.db",
+      "seed_db.py",
+      "seed_phase_13.py",
+      "seed_production.sh",
+      "setup.sh",
+      "test_api.py",
+      "test_db_connection.py",
+      "test_e2e.py",
+      "test_final_complete.py",
+      "test_imports.py",
+      "test_integration.py",
+      "test_registration_diagnostic.py",
+      "test_rl_agent.py",
+      "uvicorn"
+    ],
+    "app": {
+      "files": [
+        "__init__.py",
+        "main.py"
+      ],
+      "api": {
+        "files": [
+          "__init__.py",
+          "analytics.py",
+          "api_router.py",
+          "auth.py",
+          "deps.py",
+          "doubt_solver.py",
+          "learning_pace.py",
+          "learning_style.py",
+          "mastery.py",
+          "mindmap.py",
+          "recommendations.py",
+          "session.py",
+          "skill_gaps.py",
+          "smart_recommendations.py",
+          "students.py"
+        ]
+      },
+      "core": {
+        "files": [
+          "__init__.py",
+          "config.py",
+          "database.py",
+          "security.py"
+        ]
+      },
+      "data": {
+        "files": [
+          "vark_quiz.json"
+        ]
+      },
+      "models": {
+        "files": [
+          "__init__.py",
+          "learning_pace.py",
+          "learning_style.py",
+          "mastery.py",
+          "models.py",
+          "schemas.py",
+          "skill_gap.py",
+          "smart_recommendations.py"
+        ]
+      },
+      "services": {
+        "files": [
+          "__init__.py",
+          "collaborative_filtering.py",
+          "content_bandit.py",
+          "mastery_service.py",
+          "rl_agent.py",
+          "student_model.py"
+        ],
+        "llm": {
+          "files": [
+            "__init__.py",
+            "gemini_client.py",
+            "prompts.py"
+          ]
+        },
+        "rag": {
+          "files": [
+            "__init__.py",
+            "chunker.py",
+            "document_loader.py",
+            "embedder.py",
+            "retriever.py"
+          ]
+        },
+        "vector_db": {
+          "files": [
+            "__init__.py",
+            "mongo_client.py"
+          ]
+        }
+      }
+    },
+    "data": {
+      "documents": {
+        "files": [
+          "README.md"
+        ]
+      }
+    }
+  },
+  "components": {
+    "files": [
+      "app-layout.tsx",
+      "theme-provider.tsx",
+      "theme-toggle.tsx"
+    ],
+    "ui": {
+      "files": [
+        "animated-gradient-text.tsx",
+        "background-gradient.tsx",
+        "bento-grid.tsx",
+        "button.tsx",
+        "card-hover-effect.tsx",
+        "card.tsx",
+        "input.tsx",
+        "moving-border.tsx",
+        "spotlight.tsx",
+        "text-generate-effect.tsx"
+      ]
+    }
+  },
+  "docs": {
+    "files": [
+      "ACTION_CHECKLIST.md",
+      "DATABASE_SCHEMA.md",
+      "DEPLOYMENT.md",
+      "DEPLOYMENT_GUIDE.md",
+      "DEPLOY_QUICK.md",
+      "FINAL_SUMMARY.md",
+      "FINAL_TEST_REPORT.md",
+      "FINAL_TEST_SUMMARY.md",
+      "IMPLEMENTATION_SUMMARY.md",
+      "INTEGRATION.md",
+      "NAVIGATION_GUIDE.md",
+      "PHASE_11_2_COMPLETE.md",
+      "PHASE_11_COMPLETE.md",
+      "PHASE_12_COMPLETE.md",
+      "PHASE_9_10_COMPLETE.md",
+      "PHASE_9_10_SUCCESS.md",
+      "PORT_CONFIGURATION.md",
+      "PRESENTATION.md",
+      "PRODUCT_ROADMAP.md",
+      "PROJECT_STATUS.md",
+      "PROJECT_SUMMARY.md",
+      "QUICKSTART_RAG.md",
+      "RAG_SETUP_GUIDE.md",
+      "README_GITHUB.md",
+      "README_STARTUP.md",
+      "UI_IMPROVEMENTS.md",
+      "ai-learning-platform-inspiration.md",
+      "mednova-inspired-plan.md"
+    ]
+  },
+  "hooks": {
+    "files": [
+      "use-speech.ts"
+    ]
+  },
+  "lib": {
+    "files": [
+      "utils.ts"
+    ]
+  },
+  "public": {
+    "files": [
+      "file.svg",
+      "globe.svg",
+      "next.svg",
+      "vercel.svg",
+      "window.svg"
+    ]
+  },
+  "testing": {
+    "files": [
+      "TESTING.md",
+      "add_sidebar.sh",
+      "quick_integration_test.py",
+      "start.bat",
+      "start.sh",
+      "test_e2e_complete.py",
+      "test_phase_11_2.py",
+      "test_phase_11_3.py",
+      "test_phase_12.py",
+      "test_phase_13.py"
+    ]
+  }
+}

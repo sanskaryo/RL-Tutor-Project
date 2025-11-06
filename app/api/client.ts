@@ -3,6 +3,45 @@
  * Base URL configured via environment variables
  */
 
+import {
+  ProgressResponse,
+  RLStats,
+  PerformancePoint,
+  LearningStyleQuiz,
+  LearningStyleAnswers,
+  LearningStyleResult
+} from './types';
+
+/**
+ * Get auth token from local storage
+ */
+export const getAuthToken = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('token');
+  }
+  return null;
+};
+
+/**
+ * Clear auth token from local storage
+ */
+export const clearAuthToken = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('token');
+  }
+};
+
+/**
+ * Get auth headers
+ */
+export const getAuthHeaders = () => {
+  const token = getAuthToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 // Ensure no trailing slash in the base URL
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002/api/v1').replace(/\/+$/, '');
 
@@ -78,11 +117,20 @@ export interface ProgressData {
     skill_improvements: Record<string, number>;
 }
 
+export interface SessionSummary {
+    id: number;
+    content_id: number;
+    is_correct: boolean;
+    reward: number;
+    created_at: string;
+    topic: string;
+}
+
 export interface DashboardData {
     student: Student;
     knowledge: KnowledgeState;
     progress: ProgressData;
-    recent_sessions: any[];
+    recent_sessions: SessionSummary[];
 }
 
 export interface RecommendedContent {
@@ -130,13 +178,13 @@ class ApiClient {
         options: RequestInit = {}
     ): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
-
+        
         console.log(`[API] ${options.method || 'GET'} ${url}`);
 
         const response = await fetch(url, {
             ...options,
             headers: {
-                'Content-Type': 'application/json',
+                ...getAuthHeaders(),
                 ...options.headers,
             },
         });
@@ -176,10 +224,21 @@ class ApiClient {
     }
 
     async login(data: LoginData): Promise<TokenResponse> {
-        return this.request<TokenResponse>('/auth/login', {
+        const response = await this.request<TokenResponse>('/auth/login', {
             method: 'POST',
             body: JSON.stringify(data),
         });
+        
+        // Store the token in localStorage
+        if (typeof window !== 'undefined' && response.access_token) {
+            localStorage.setItem('token', response.access_token);
+        }
+        
+        return response;
+    }
+
+    async logout(): Promise<void> {
+        clearAuthToken();
     }
 
     async getProfile(token: string): Promise<Student> {
@@ -193,7 +252,7 @@ class ApiClient {
         difficulty?: number
     ): Promise<Content> {
         const params = new URLSearchParams({ username });
-        const body: any = {};
+        const body: { topic?: string; difficulty?: number } = {};
         if (topic) body.topic = topic;
         if (difficulty) body.difficulty = difficulty;
 
@@ -211,9 +270,9 @@ class ApiClient {
         });
     }
 
-    async getProgress(username: string): Promise<any> {
+    async getProgress(username: string): Promise<ProgressResponse> {
         const params = new URLSearchParams({ username });
-        return this.request(`/session/progress?${params}`);
+        return this.request<ProgressResponse>(`/session/progress?${params}`);
     }
 
     // ==================== ANALYTICS ENDPOINTS ====================
@@ -222,46 +281,62 @@ class ApiClient {
         return this.request<DashboardData>(`/analytics/dashboard?${params}`);
     }
 
-    async getRLStats(): Promise<any> {
-        return this.request('/analytics/rl-stats');
+    async getRLStats(): Promise<RLStats> {
+        return this.request<RLStats>('/analytics/rl-stats');
     }
 
-    async getPerformanceChart(username: string, days: number = 7): Promise<any[]> {
+    async getPerformanceChart(username: string, days: number = 7): Promise<PerformancePoint[]> {
         const params = new URLSearchParams({
             username,
             days: days.toString()
         });
-        return this.request(`/analytics/performance-chart?${params}`);
+        return this.request<PerformancePoint[]>(`/analytics/performance-chart?${params}`);
     }
 
     // ==================== RECOMMENDATIONS ENDPOINTS ====================
-    async getDashboardRecommendations(token: string): Promise<DashboardRecommendations> {
-        return this.request<DashboardRecommendations>('/recommendations/dashboard', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
+    async getDashboardRecommendations(): Promise<DashboardRecommendations> {
+        return this.request<DashboardRecommendations>('/recommendations/dashboard');
     }
 
     // ==================== LEARNING STYLE ENDPOINTS ====================
-    async getLearningStyleQuiz(): Promise<any> {
-        return this.request('/quiz');
+    async getLearningStyleQuiz(): Promise<LearningStyleQuiz> {
+        return this.request<LearningStyleQuiz>('/quiz');
     }
 
-    async submitLearningStyle(userId: string, answers: any): Promise<any> {
-        return this.request(`/students/${userId}/learning-style`, {
+    async submitLearningStyle(userId: string, answers: LearningStyleAnswers): Promise<LearningStyleResult> {
+        return this.request<LearningStyleResult>(`/students/${userId}/learning-style`, {
             method: 'POST',
             body: JSON.stringify({ answers }),
         });
     }
 
-    async getLearningStyle(userId: string): Promise<any> {
-        return this.request(`/students/${userId}/learning-style`);
+    async getLearningStyle(userId: string): Promise<LearningStyleResult> {
+        return this.request<LearningStyleResult>(`/students/${userId}/learning-style`);
+    }
+
+    // ==================== DOUBT SOLVER ENDPOINTS ====================
+    async askDoubt(question: string, subject?: string | null): Promise<{
+        answer: string;
+        sources?: Array<{
+            text: string;
+            subject?: string;
+            chapter?: string;
+            source?: string;
+            relevance_score: number;
+        }>;
+    }> {
+        return this.request('/doubt/ask', {
+            method: 'POST',
+            body: JSON.stringify({
+                question,
+                subject: subject || null,
+                context_limit: 3,
+                include_sources: true,
+            }),
+        });
     }
 }
 
 // Export singleton instance
 export const api = new ApiClient(API_BASE);
-
-// Export default
 export default api;

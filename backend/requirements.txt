@@ -33,6 +33,7 @@ pytest
 requests
 
 # RAG & LLM Services (New)
+google-genai>=0.3.0
 google-generativeai>=0.3.0
 pymongo>=4.6.0
 pymupdf>=1.23.0

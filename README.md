@@ -55,7 +55,8 @@ pip install -r requirements.txt
 python seed_db.py
 
 # Run server
-uvicorn main:app --reload
+  
+  python -m uvicorn main:app --host 0.0.0.0 --port 8002
 ```
 
 Visit: **http://localhost:8000/docs** (API Documentation)
@@ -205,10 +206,10 @@ See [TESTING.md](./TESTING.md) for complete testing guide
 
 ## 👥 Team
 
-- Dr. Sarah Chen - AI Research Lead
-- Alex Kumar - Full-Stack Developer
-- Maya Patel - ML Engineer
-- James Wilson - UX Designer
+- Sanskar Khandelwal - AI Research Lead
+- Ayush Saroj  - Full stack
+- Krishna mittal- devops
+
 
 ## 📝 Next Steps
 

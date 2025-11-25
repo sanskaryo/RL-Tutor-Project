@@ -10,7 +10,7 @@ import { Brain, Target, TrendingUp, Award, BookOpen, Lightbulb, ArrowRight, Aler
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { user, isAuthenticated } = useAuth();
+    const { user, token, isAuthenticated, logout } = useAuth();
     const [dashboard, setDashboard] = useState<DashboardData | null>(null);
     const [recommendations, setRecommendations] = useState<DashboardRecommendations | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -18,13 +18,13 @@ export default function DashboardPage() {
     const [tokenExpired, setTokenExpired] = useState(false);
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !token) {
             router.push('/login');
             return;
         }
 
         loadDashboard();
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, user, token]);
 
     const loadDashboard = async () => {
         if (!user) return;
@@ -35,25 +35,26 @@ export default function DashboardPage() {
             setDashboard(data);
 
             // Load recommendations if token available
-            const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    const recs = await api.getDashboardRecommendations(token);
+                    const recs = await api.getDashboardRecommendations();
                     setRecommendations(recs);
-                } catch (recError: any) {
+                } catch (error) {
+                    const recError = error as Error;
                     console.error('Failed to load recommendations:', recError);
                     
-                    // If token is invalid/expired, clear it and show warning
-                    if (recError.message && recError.message.includes('401')) {
-                        console.warn('Token expired or invalid - clearing local storage');
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('username');
+                    // If token is invalid/expired, handle auth failure
+                    if (recError.message && recError.message.includes('Could not validate credentials')) {
+                        console.warn('Token expired or invalid');
                         setTokenExpired(true);
-                        // Don't set error - just skip recommendations, dashboard still works
+                        logout(); // Use AuthContext's logout to handle cleanup
+                        router.push('/login');
+                        return;
                     }
                 }
             }
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as Error;
             setError(err.message || 'Failed to load dashboard');
         } finally {
             setIsLoading(false);
@@ -119,7 +120,7 @@ export default function DashboardPage() {
                                 <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
                                     Welcome back, {student.full_name || student.username}! 👋
                                 </h1>
-                                <p className="text-neutral-400 text-lg">Here's your personalized learning overview</p>
+                                <p className="text-neutral-400 text-lg">Here&apos;s your personalized learning overview</p>
                             </div>
                             <div className="hidden md:flex items-center gap-3">
                                 <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full">

@@ -37,15 +37,33 @@ export default function DoubtSolverChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Speech recognition and text-to-speech
+  // Retry configuration
+  const retryConfig = {
+    maxRetries: 3,
+    initialDelay: 1000
+  };
+  const retryConfig = {
+    maxRetries: 3,
+    initialDelay: 1000
+  };
+  
   const { isListening, transcript, startListening, stopListening, resetTranscript, isSupported: speechSupported } = useSpeechRecognition();
   const { speak, stop: stopSpeaking, isSpeaking, isSupported: ttsSupported } = useTextToSpeech();
-
+  
   useEffect(() => {
     if (transcript) {
       setInput(transcript);
     }
   }, [transcript]);
+  
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      resetTranscript();
+      startListening();
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -55,11 +73,11 @@ export default function DoubtSolverChat() {
     scrollToBottom();
   }, [messages]);
 
-  const retryableRequest = async <T,>(
-    request: () => Promise<T>,
+  const retryableRequest = async (
+    request: () => Promise<any>,
     maxRetries: number = 3,
     initialDelay: number = 1000
-  ): Promise<T> => {
+  ) => {
     let retryCount = 0;
     let lastError: Error | null = null;
 
@@ -76,10 +94,10 @@ export default function DoubtSolverChat() {
           retryCount++;
           continue;
         }
+        
         throw lastError;
       }
     }
-    throw lastError;
   };
 
   const handleSendMessage = async () => {
@@ -92,73 +110,69 @@ export default function DoubtSolverChat() {
       timestamp: new Date(),
     };
 
-    const inputText = input.trim();
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
-    try {
-      console.log('[DoubtSolverChat] processing request', {
-        input: inputText,
-        selectedSubject: selectedSubject || null,
-      });
+    const maxRetries = 3;
+    let retryCount = 0;
 
-      const data = await retryableRequest(
-        async () => {
-          const response = await api.askDoubt(inputText, selectedSubject || null);
-          
-          if (!response || typeof response.answer !== 'string') {
-            console.warn('[DoubtSolverChat] unexpected API response payload', response);
-            throw new Error('API response missing "answer" field');
-          }
+    while (retryCount < maxRetries) {
+      try {
+        console.log('[DoubtSolverChat] sending request', {
+          input: input.trim(),
+          selectedSubject: selectedSubject || null,
+          attempt: retryCount + 1,
+        });
 
-          if (response.sources && !Array.isArray(response.sources)) {
-            console.warn('[DoubtSolverChat] sources payload is not an array', response.sources);
-          }
+        const data = await api.askDoubt(input.trim(), selectedSubject || null);
 
-          return response;
+        if (!data || typeof data.answer !== 'string') {
+          console.warn('[DoubtSolverChat] unexpected API response payload', data);
+          throw new Error('API response missing "answer" field');
         }
-      );
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.answer,
-        sources: data.sources,
-        timestamp: new Date(),
-      };
+        if (data.sources && !Array.isArray(data.sources)) {
+          console.warn('[DoubtSolverChat] sources payload is not an array', data.sources);
+        }
 
-      // Clear any previous error messages
-      setMessages(prev => prev.filter(m => 
-        !(m.role === 'assistant' && m.content.includes('Sorry, I encountered an error'))
-      ));
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.answer,
+          sources: data.sources,
+          timestamp: new Date(),
+        };
 
-      setMessages(prev => [...prev, assistantMessage]);
+        // Clear any previous error messages for this query
+        setMessages(prev => prev.filter(m => 
+          !(m.role === 'assistant' && m.content.includes('Sorry, I encountered an error'))
+        ));
+
+      setMessages((prev) => [...prev, assistantMessage]);
       
       // Auto-speak response
       if (ttsSupported) {
         speak(data.answer);
       }
     } catch (error) {
-      console.error('Error sending message after retries:', error);
+      console.error('Error sending message:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Sorry, I encountered an error processing your question after multiple attempts. ${error instanceof Error ? error.message : 'Please try again later.'}`,
+        content: `Sorry, I encountered an error processing your question. ${error instanceof Error ? error.message : 'Please try again.'}`,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleListening = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      resetTranscript();
-      startListening();
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
@@ -203,7 +217,7 @@ export default function DoubtSolverChat() {
               </div>
               <h3 className="text-lg font-semibold mb-2">Ask Your JEE Doubts!</h3>
               <p className="text-sm text-muted-foreground max-w-md">
-                I&apos;ll provide detailed answers based on NCERT and JEE study materials with source citations.
+                I'll provide detailed answers based on NCERT and JEE study materials with source citations.
               </p>
             </motion.div>
           ) : (

@@ -8,6 +8,7 @@ from sqlalchemy import func, and_
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 from pydantic import BaseModel
+import json
 
 from app.core.database import get_db
 from app.models.models import Student, Content, LearningSession
@@ -18,6 +19,8 @@ from app.models.smart_recommendations import (
 from app.api.auth import get_current_student
 from app.services.content_bandit import ContentBandit, calculate_content_reward
 from app.services.collaborative_filtering import CollaborativeFiltering
+from app.core.config import settings
+from app.services.llm.gemini_client import GeminiClient
 
 router = APIRouter(prefix="/smart-recommendations", tags=["smart-recommendations"])
 
@@ -393,6 +396,10 @@ async def get_peer_learning_insights(
 class ReviewRequest(BaseModel):
     quality: int  # 0-5 scale (SM-2 algorithm)
 
+class FlashcardGenerateRequest(BaseModel):
+    topic: str
+    count: int = 5
+
 class FlashcardCreateRequest(BaseModel):
     concept_name: str
     question: str
@@ -400,6 +407,77 @@ class FlashcardCreateRequest(BaseModel):
     concept_id: Optional[int] = None
     difficulty: int = 3
     tags: List[str] = []
+
+@router.post("/flashcards/generate")
+async def generate_flashcards(
+    request: FlashcardGenerateRequest,
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db)
+):
+    """Generate flashcards using Gemini AI"""
+    if not settings.GEMINI_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Gemini API key not configured"
+        )
+    
+    try:
+        client = GeminiClient(api_key=settings.GEMINI_API_KEY)
+        
+        prompt = f"""
+        Generate {request.count} flashcards for the topic: "{request.topic}".
+        The flashcards should be suitable for a university student.
+        
+        Return a JSON object with a "flashcards" key containing a list of objects.
+        Each object must have:
+        - "concept_name": A short title for the concept (max 5 words)
+        - "question": The question or front of the card
+        - "answer": The answer or back of the card
+        - "difficulty": An integer from 1 (easy) to 5 (hard)
+        """
+        
+        response_json = client.generate_json(prompt)
+        data = json.loads(response_json)
+        
+        # Handle both { "flashcards": [...] } and [...] formats
+        if isinstance(data, list):
+            cards_list = data
+        elif isinstance(data, dict) and "flashcards" in data:
+            cards_list = data["flashcards"]
+        else:
+            raise ValueError("Invalid response format from AI")
+            
+        created_cards = []
+        for card_data in cards_list:
+            flashcard = FlashCard(
+                student_id=current_student.id,
+                concept_name=card_data.get("concept_name", "Concept"),
+                question=card_data.get("question", ""),
+                answer=card_data.get("answer", ""),
+                difficulty=card_data.get("difficulty", 3),
+                next_review_date=datetime.utcnow(),
+                tags=[request.topic]
+            )
+            db.add(flashcard)
+            created_cards.append(flashcard)
+            
+        db.commit()
+        
+        # Refresh to get IDs
+        for card in created_cards:
+            db.refresh(card)
+            
+        return {
+            "message": f"Generated {len(created_cards)} flashcards",
+            "flashcards": created_cards
+        }
+        
+    except Exception as e:
+        print(f"Error generating flashcards: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate flashcards: {str(e)}"
+        )
 
 @router.post("/flashcards/create")
 async def create_flashcard(
@@ -642,3 +720,6 @@ async def delete_flashcard(
     db.commit()
     
     return {"message": "Flashcard deleted"}
+
+
+

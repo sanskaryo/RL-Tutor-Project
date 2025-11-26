@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Brain, CheckCircle, XCircle, Calendar, TrendingUp, Clock, Plus, Trash2 } from "lucide-react";
+import { Brain, CheckCircle, XCircle, Calendar, TrendingUp, Clock, Plus, Trash2, Sparkles, RotateCw } from "lucide-react";
 import Sidebar from "@/app/components/Sidebar";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FlashCard {
   id: number;
@@ -40,6 +41,10 @@ export default function FlashcardsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showGenerateForm, setShowGenerateForm] = useState(false);
+  const [generateTopic, setGenerateTopic] = useState("");
+  const [generateCount, setGenerateCount] = useState(5);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Create form state
   const [newCard, setNewCard] = useState({
@@ -66,7 +71,8 @@ export default function FlashcardsPage() {
     }
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8002";
+      // Ensure API_BASE doesn't have trailing slash or /api/v1 if it's already in the path
+      const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8002").replace(/\/api\/v1\/?$/, "");
 
       // Load due cards
       const dueResponse = await fetch(
@@ -113,7 +119,7 @@ export default function FlashcardsPage() {
 
     setIsReviewing(true);
     const token = localStorage.getItem("token");
-    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8002";
+    const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8002").replace(/\/api\/v1\/?$/, "");
 
     try {
       const response = await fetch(
@@ -158,7 +164,7 @@ export default function FlashcardsPage() {
     }
 
     const token = localStorage.getItem("token");
-    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8002";
+    const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8002").replace(/\/api\/v1\/?$/, "");
 
     try {
       const response = await fetch(
@@ -191,6 +197,58 @@ export default function FlashcardsPage() {
     } catch (err) {
       setError("Failed to create flashcard");
       console.error(err);
+    }
+  };
+
+  const generateFlashcards = async () => {
+    if (!generateTopic) {
+      setError("Please enter a topic");
+      return;
+    }
+
+    setIsGenerating(true);
+    setError(null);
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+      setError("You must be logged in to generate flashcards.");
+      setIsGenerating(false);
+      return;
+    }
+
+    const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8002").replace(/\/api\/v1\/?$/, "");
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/api/v1/smart-recommendations/flashcards/generate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            topic: generateTopic,
+            count: generateCount
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setShowGenerateForm(false);
+        setGenerateTopic("");
+        await loadData();
+      } else if (response.status === 401) {
+        setError("Session expired. Please log in again.");
+      } else {
+        const data = await response.json();
+        setError(data.detail || "Failed to generate flashcards");
+      }
+    } catch (err) {
+      setError("Failed to generate flashcards. Please check your connection.");
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -243,13 +301,22 @@ export default function FlashcardsPage() {
                 <p className="text-zinc-400 mt-1">Master concepts with intelligent review scheduling</p>
               </div>
             </div>
-            <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg font-medium transition-all"
-            >
-              <Plus className="w-5 h-5" />
-              New Card
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowGenerateForm(!showGenerateForm)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-lg font-medium transition-all"
+              >
+                <Sparkles className="w-5 h-5" />
+                Generate with AI
+              </button>
+              <button
+                onClick={() => setShowCreateForm(!showCreateForm)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg font-medium transition-all"
+              >
+                <Plus className="w-5 h-5" />
+                New Card
+              </button>
+            </div>
           </div>
         </div>
 
@@ -258,6 +325,61 @@ export default function FlashcardsPage() {
             {error}
           </div>
         )}
+
+        {/* Generate Form */}
+        <AnimatePresence>
+          {showGenerateForm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-8 overflow-hidden"
+            >
+              <div className="p-6 bg-zinc-950 rounded-xl border border-amber-500/30">
+                <div className="flex items-center gap-2 mb-4 text-amber-400">
+                  <Sparkles className="w-5 h-5" />
+                  <h2 className="text-xl font-bold">Generate Flashcards with AI</h2>
+                </div>
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    value={generateTopic}
+                    onChange={(e) => setGenerateTopic(e.target.value)}
+                    className="flex-1 px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-amber-500"
+                    placeholder="Enter a topic (e.g., 'Quantum Physics', 'French Revolution', 'Calculus Derivatives')"
+                    disabled={isGenerating}
+                  />
+                  <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3">
+                    <span className="text-zinc-400 text-sm whitespace-nowrap">Count:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={generateCount}
+                      onChange={(e) => setGenerateCount(parseInt(e.target.value) || 5)}
+                      className="w-16 bg-transparent text-white focus:outline-none text-center"
+                      disabled={isGenerating}
+                    />
+                  </div>
+                  <button
+                    onClick={generateFlashcards}
+                    disabled={isGenerating}
+                    className="px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-lg font-medium transition-all disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <RotateCw className="w-5 h-5 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      "Generate"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Create Form */}
         {showCreateForm && (
@@ -323,6 +445,39 @@ export default function FlashcardsPage() {
           </div>
         )}
 
+        {/* Generate Form */}
+        {showGenerateForm && (
+          <div className="mb-8 p-6 bg-zinc-950 rounded-xl border border-zinc-800">
+            <h2 className="text-xl font-bold mb-4">Generate Flashcards</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-zinc-400 mb-2">Topic</label>
+                <input
+                  type="text"
+                  value={generateTopic}
+                  onChange={(e) => setGenerateTopic(e.target.value)}
+                  className="w-full px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                  placeholder="e.g., Photosynthesis"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={generateFlashcards}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg font-medium transition-all"
+                >
+                  {isGenerating ? "Generating..." : "Generate Flashcards"}
+                </button>
+                <button
+                  onClick={() => setShowGenerateForm(false)}
+                  className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -368,70 +523,68 @@ export default function FlashcardsPage() {
 
         {/* Review Card */}
         {currentCard ? (
-          <div className="bg-zinc-950 rounded-xl p-8 border border-zinc-800 mb-8">
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-zinc-400">
-                  Card {currentIndex + 1} of {dueCards.length}
-                </span>
-                <span className={`text-sm font-mono ${getDifficultyColor(currentCard.difficulty)}`}>
+          <div className="mb-8">
+            <div className="mb-6 flex items-center justify-between">
+              <span className="text-sm text-zinc-400">
+                Card {currentIndex + 1} of {dueCards.length}
+              </span>
+              <div className="flex items-center gap-4 text-sm text-zinc-400">
+                <span className={`font-mono ${getDifficultyColor(currentCard.difficulty)}`}>
                   Difficulty: {currentCard.difficulty}/5
                 </span>
-              </div>
-              <h2 className="text-2xl font-bold mb-2">{currentCard.concept_name}</h2>
-              <div className="flex items-center gap-4 text-sm text-zinc-400">
                 <span>Streak: {currentCard.streak}</span>
-                <span>•</span>
-                <span>Retention: {currentCard.retention_rate}%</span>
-                <span>•</span>
-                <span>Interval: {currentCard.interval} days</span>
               </div>
             </div>
 
-            <div className="min-h-[200px] mb-6">
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-purple-400 mb-3">Question:</h3>
-                <p className="text-lg leading-relaxed">{currentCard.question}</p>
-              </div>
-
-              {showAnswer && (
-                <div className="mt-6 p-4 bg-zinc-900 rounded-lg border-l-4 border-green-500">
-                  <h3 className="text-lg font-bold text-green-400 mb-3">Answer:</h3>
-                  <p className="text-lg leading-relaxed">{currentCard.answer}</p>
-                </div>
-              )}
-            </div>
-
-            {!showAnswer ? (
-              <button
-                onClick={() => setShowAnswer(true)}
-                className="w-full py-4 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg font-bold text-lg transition-all"
+            <div className="relative h-[400px] w-full perspective-1000">
+              <motion.div
+                className="w-full h-full relative preserve-3d cursor-pointer"
+                animate={{ rotateY: showAnswer ? 180 : 0 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
+                onClick={() => !showAnswer && setShowAnswer(true)}
               >
-                Show Answer
-              </button>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-center text-sm text-zinc-400 mb-4">How well did you remember?</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {[0, 1, 2, 3, 4, 5].map((quality) => (
-                    <button
-                      key={quality}
-                      onClick={() => reviewCard(quality)}
-                      disabled={isReviewing}
-                      className={`p-4 rounded-lg border-2 transition-all hover:scale-105 ${quality < 3
-                        ? "border-red-500 hover:bg-red-500/10"
-                        : quality === 3
-                          ? "border-yellow-500 hover:bg-yellow-500/10"
-                          : "border-green-500 hover:bg-green-500/10"
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      <div className="font-bold mb-1">{quality}</div>
-                      <div className="text-xs text-zinc-400">{getQualityLabel(quality)}</div>
-                    </button>
-                  ))}
+                {/* Front of Card */}
+                <div className="absolute w-full h-full backface-hidden bg-zinc-950 rounded-xl p-8 border border-zinc-800 flex flex-col items-center justify-center text-center hover:border-purple-500/50 transition-colors">
+                  <h2 className="text-xl text-purple-400 font-bold mb-6">{currentCard.concept_name}</h2>
+                  <p className="text-2xl font-medium leading-relaxed">{currentCard.question}</p>
+                  <div className="absolute bottom-6 text-zinc-500 text-sm flex items-center gap-2">
+                    <RotateCw className="w-4 h-4" />
+                    Click to flip
+                  </div>
                 </div>
-              </div>
-            )}
+
+                {/* Back of Card */}
+                <div 
+                  className="absolute w-full h-full backface-hidden bg-zinc-900 rounded-xl p-8 border border-zinc-700 flex flex-col items-center justify-center text-center rotate-y-180"
+                  style={{ transform: "rotateY(180deg)" }}
+                >
+                  <h3 className="text-lg font-bold text-green-400 mb-4">Answer</h3>
+                  <p className="text-xl leading-relaxed mb-8">{currentCard.answer}</p>
+                  
+                  <div className="w-full" onClick={(e) => e.stopPropagation()}>
+                    <p className="text-sm text-zinc-400 mb-4">How well did you remember?</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[0, 1, 2, 3, 4, 5].map((quality) => (
+                        <button
+                          key={quality}
+                          onClick={() => reviewCard(quality)}
+                          disabled={isReviewing}
+                          className={`p-2 rounded-lg border transition-all hover:scale-105 ${quality < 3
+                            ? "border-red-500/50 hover:bg-red-500/10"
+                            : quality === 3
+                              ? "border-yellow-500/50 hover:bg-yellow-500/10"
+                              : "border-green-500/50 hover:bg-green-500/10"
+                            } disabled:opacity-50`}
+                        >
+                          <div className="font-bold">{quality}</div>
+                          <div className="text-[10px] text-zinc-400 truncate">{getQualityLabel(quality)}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
           </div>
         ) : dueCards.length === 0 && stats && stats.total_cards > 0 ? (
           <div className="text-center py-12">

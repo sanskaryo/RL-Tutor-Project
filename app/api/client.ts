@@ -9,7 +9,9 @@ import {
   PerformancePoint,
   LearningStyleQuiz,
   LearningStyleAnswers,
-  LearningStyleResult
+  LearningStyleResult,
+  RLSessionStartResponse,
+  RLSubmitResponse
 } from './types';
 
 /**
@@ -333,6 +335,21 @@ class ApiClient {
                 context_limit: 3,
                 include_sources: true,
             }),
+        });
+    }
+
+    // ==================== RL QUIZ ENDPOINTS ====================
+    async startRLSession(studentId: string): Promise<RLSessionStartResponse> {
+        return this.request<RLSessionStartResponse>('/rl-quiz/start', {
+            method: 'POST',
+            body: JSON.stringify({ student_id: studentId }),
+        });
+    }
+
+    async submitRLAnswer(sessionId: string, answer: string, isCorrect: boolean): Promise<RLSubmitResponse> {
+        return this.request<RLSubmitResponse>('/rl-quiz/submit', {
+            method: 'POST',
+            body: JSON.stringify({ session_id: sessionId, answer, is_correct: isCorrect }),
         });
     }
 }

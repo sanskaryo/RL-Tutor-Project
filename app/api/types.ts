@@ -43,3 +43,25 @@ export interface LearningStyleResult {
     };
     recommendations: string[];
 }
+
+export interface RLQuizQuestion {
+    text: string;
+    id: string;
+    type: string;
+    choices: string[];
+    skill: string;
+}
+
+export interface RLSessionStartResponse {
+    session_id: string;
+    question: RLQuizQuestion;
+    mastery: number;
+}
+
+export interface RLSubmitResponse {
+    correct: boolean;
+    reward: number;
+    mastery: number;
+    done: boolean;
+    next_question: RLQuizQuestion | null;
+}

@@ -1,234 +1,171 @@
-# Phase 1 & 2 Implementation Summary
+# RL-Based Personalized Educational Tutor 🎓🤖
 
-## ✅ Completed Features
-
-### Phase 1: Foundation & Theme System
-
-#### 1. **Theme System** ✓
-- Implemented comprehensive dark/light mode support using `next-themes`
-- Created custom color palette (Blue primary, Green accent - **NO PURPLE**)
-- CSS variables for consistent theming across all components
-- Automatic system theme detection
-- Smooth theme transitions
-
-#### 2. **UI Component Library** ✓
-Created shadcn/ui compatible components in `/components/ui/`:
-- `button.tsx` - Multiple variants (default, destructive, outline, secondary, ghost, link)
-- `card.tsx` - Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
-- `input.tsx` - Styled input fields with focus states
-- `theme-provider.tsx` - Theme context provider
-- `theme-toggle.tsx` - Dark/light mode toggle button
-
-#### 3. **Consistent Layout System** ✓
-- Created `AppLayout` component (`/components/app-layout.tsx`) with:
-  - **Responsive sidebar navigation** (collapsible on mobile)
-  - **Back button** on all pages (except dashboard)
-  - **Theme toggle** in header
-  - **Smooth animations** using Framer Motion
-  - Consistent navigation across all pages
-
-Navigation includes:
-- Dashboard
-- Chat
-- Doubt Solver
-- Mind Map
-- Skill Tree
-- Skill Gaps
-- Study Plan
-
-### Phase 2: Core Feature Enhancements
-
-#### 4. **Speech Features** ✓
-Created custom hooks in `/hooks/use-speech.ts`:
-- **Speech-to-Text (STT)**: `useSpeechRecognition()`
-  - Real-time transcription
-  - Continuous listening mode
-  - Browser compatibility detection
-- **Text-to-Speech (TTS)**: `useTextToSpeech()`
-  - Auto-speak assistant responses
-  - Manual playback controls
-  - Adjustable rate, pitch, volume
-
-#### 5. **Enhanced Chat Component** ✓
-Updated `/app/components/chat/Chat.tsx`:
-- ✨ **Animations**: Smooth message entry/exit with Framer Motion
-- 🎤 **Speech Input**: Mic button for voice input
-- 🔊 **Audio Output**: Speaker button on assistant messages
-- 💬 **Modern UI**: shadcn Card components
-- ⌨️ **Keyboard Shortcuts**: Enter to send, Shift+Enter for new line
-- 📱 **Responsive Design**: Works on all screen sizes
-- 🎨 **Theme Support**: Adapts to dark/light mode
-
-#### 6. **Enhanced Doubt Solver** ✓
-Updated `/app/components/DoubtSolver/DoubtSolverChat.tsx`:
-- ✨ **Smooth Animations**: Message transitions, loading states
-- 🎤 **Voice Input**: Speech-to-text integration
-- 🔊 **Voice Output**: Auto-speak answers with manual controls
-- 📚 **Collapsible Sources**: Click to expand/collapse source citations
-- 🎯 **Subject Filter**: Dropdown for Physics/Chemistry/Math
-- 💡 **Empty State**: Beautiful placeholder when no messages
-- 🎨 **Modern Design**: Using shadcn components throughout
-- 📊 **Source Relevance**: Visual indicators for source quality
-
-#### 7. **Page Integration** ✓
-Updated pages to use new layout:
-- `/app/chat/page.tsx` - Wrapped with AppLayout
-- `/app/doubt-solver/page.tsx` - Wrapped with AppLayout
+> **B.Tech CS AIML and IoT 3rd Year Mini Project**
+>
+> **Developed by:**
+> - **Sanskar Khandelwal**
+> - **Krishna Mittal**
+> - **Ayush Saroj**
 
 ---
 
-## 🎨 Design Improvements
+## 🎯 Project Overview
 
-### Color Scheme
-- **Primary**: Blue (#3B82F6 light, #60A5FA dark)
-- **Accent**: Green (#10B981 light, #34D399 dark)
-- **No Purple**: Removed all purple colors as requested
-- **Semantic Colors**: Proper destructive, muted, border colors
+The **RL-Tutor-Project** is an advanced, personalized educational platform that leverages **Reinforcement Learning (RL)**, **Generative AI (GenAI)**, and **Machine Learning (ML)** to optimize the learning experience for students. Unlike traditional Learning Management Systems (LMS) that offer static content, this system dynamically adapts to each student's learning pace, style, and knowledge gaps in real-time.
 
-### Animations
-- Page transitions (fade + slide up)
-- Message entry/exit animations
-- Loading spinners
-- Hover effects on buttons
-- Smooth sidebar toggle
+By integrating a **Deep Knowledge Tracing (DKT)** model with a **Proximal Policy Optimization (PPO)** agent, the system acts as an intelligent tutor that selects the most appropriate questions and content to maximize learning gains. Additionally, it features an AI-powered **Doubt Solver** using **Retrieval-Augmented Generation (RAG)** and a **Multi-Armed Bandit** system for content type optimization.
 
-### Typography
-- Consistent font sizes
-- Proper heading hierarchy
-- Readable line heights
-- Responsive text scaling
+## 🌟 Key Features
 
----
+- 🧠 **Adaptive Quiz System:** An RL agent (PPO) selects questions based on student history to keep them in the \"Zone of Proximal Development\".
+- 🤖 **AI Doubt Solver:** A RAG-based chat interface that answers academic queries with citations from valid study materials (NCERT/JEE).
+- 📊 **Smart Recommendations:** Uses Multi-Armed Bandit algorithms to suggest the best content format (Video, Text, Interactive) for each student.
+- 🃏 **AI Flashcards:** Generative AI creates personalized flashcards for spaced repetition and revision.
+- 📈 **Real-time Knowledge Tracking:** Deep Knowledge Tracing (DKT) estimates mastery of various skills continuously.
+- 🎨 **Modern UI:** A beautiful, responsive interface built with Next.js and Aceternity UI.
+- 🔐 **Secure Authentication:** JWT-based auth with refresh tokens.
 
-## 📦 Dependencies Added
+## 🛠️ Tech Stack
 
-```json
-{
-  "@radix-ui/react-slot": "^1.x",
-  "@radix-ui/react-dropdown-menu": "^1.x",
-  "@radix-ui/react-tabs": "^1.x",
-  "@radix-ui/react-select": "^1.x",
-  "@radix-ui/react-switch": "^1.x",
-  "@radix-ui/react-toast": "^1.x",
-  "class-variance-authority": "^0.x",
-  "framer-motion": "^12.x"
-}
-```
+### Frontend
+- **Framework:** Next.js 14 (React)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS, Framer Motion
+- **Visualization:** Recharts, React-Flow
 
----
+### Backend
+- **Framework:** FastAPI (Python)
+- **Database:** SQLite (Dev) / PostgreSQL (Prod), MongoDB (Vector Store)
+- **ORM:** SQLAlchemy, Pydantic
 
-## 🚀 How to Use
+### AI & Machine Learning
+- **Reinforcement Learning:** Stable Baselines3 (PPO), Gymnasium
+- **Generative AI:** Google Gemini Pro & Flash (via `google-genai` SDK)
+- **Knowledge Tracing:** TensorFlow/Keras (LSTM-based DKT)
+- **Embeddings:** `text-embedding-004`
 
-### Theme Toggle
-- Click the sun/moon icon in the header to switch themes
-- Theme preference is saved automatically
+## 🏗️ System Architecture
 
-### Speech Features
+### High-Level Architecture
+\`\`\`mermaid
+graph TD
+    User[Student] -->|HTTPS| FE[Next.js Frontend]
+    FE -->|REST API| BE[FastAPI Backend]
+    
+    subgraph Backend Services
+        BE --> Auth[Auth Service]
+        BE --> RL[RL Engine (PPO/DKT)]
+        BE --> MAB[Bandit Service]
+        BE --> RAG[RAG Service]
+    end
+    
+    subgraph Data Layer
+        BE --> SQL[(Relational DB)]
+        RAG --> Vector[(Vector DB)]
+    end
+    
+    subgraph External AI
+        RAG --> Gemini[Google Gemini API]
+        RL --> Gemini
+    end
+\`\`\`
 
-#### Voice Input:
-1. Click the microphone icon in the input field
-2. Speak your question
-3. Click again to stop recording
-4. Text appears automatically in the input
+### RL Training Loop
+\`\`\`mermaid
+sequenceDiagram
+    participant Agent as PPO Teacher Agent
+    participant Env as Question Environment
+    participant Student as Student Model (DKT)
+    
+    loop Training Step
+        Agent->>Env: Select Action (Question ID)
+        Env->>Student: Simulate Student Answer
+        Student-->>Env: Return Correctness & New State
+        Env->>Env: Calculate Reward
+        Env-->>Agent: Next State, Reward
+        Agent->>Agent: Update Policy
+    end
+\`\`\`
 
-#### Voice Output:
-1. Assistant responses auto-play (if TTS supported)
-2. Click speaker icon on any message to replay
-3. Click VolumeX to stop playback
+## 🔬 Methodology
 
-### Navigation
-- Use sidebar to navigate between features
-- Click "Back" button to return to previous page
-- Sidebar collapses on mobile (toggle with menu icon)
+### 1. Reinforcement Learning (Teacher Agent)
+- **Algorithm:** Proximal Policy Optimization (PPO)
+- **Goal:** Select the next question to maximize learning improvement.
+- **Reward Function:** Balances *Improvement* (learning gain), *Answerability* (avoiding frustration), and *Coverage* (addressing weak skills).
 
----
+### 2. Multi-Armed Bandit (Content Optimization)
+- **Algorithm:** Epsilon-Greedy
+- **Goal:** Discover the best content format (Video vs. Text) for the user.
+- **Mechanism:** Explores new formats occasionally ($\epsilon$) while exploiting the best-performing format most of the time.
 
-## 🔧 Technical Details
+### 3. Retrieval-Augmented Generation (Doubt Solver)
+- **Process:** Embeds student queries, retrieves relevant chunks from the vector database (MongoDB), and uses Gemini to generate an accurate, cited answer.
 
-### File Structure
-```
-/components
-  /ui
-    - button.tsx
-    - card.tsx
-    - input.tsx
-  - app-layout.tsx
-  - theme-provider.tsx
-  - theme-toggle.tsx
+## 🚀 Quick Start
 
-/hooks
-  - use-speech.ts
+### Prerequisites
+- Node.js 18+
+- Python 3.8+
+- npm or yarn
 
-/app
-  /components
-    /chat
-      - Chat.tsx (enhanced)
-    /DoubtSolver
-      - DoubtSolverChat.tsx (enhanced)
-  /chat
-    - page.tsx (updated)
-  /doubt-solver
-    - page.tsx (updated)
-  - globals.css (theme variables)
-  - layout.tsx (ThemeProvider added)
-```
+### 1. Frontend (Next.js)
 
-### Browser Compatibility
-- **Speech Recognition**: Chrome, Edge (WebKit browsers)
-- **Text-to-Speech**: All modern browsers
-- **Animations**: All browsers with CSS animations support
-- **Theme**: All browsers
+\`\`\`bash
+# Install dependencies
+npm install
 
----
+# Run development server
+npm run dev
+\`\`\`
 
-## 🎯 Next Steps (Phase 3 & 4)
+Visit: **http://localhost:3000**
 
-### Pending Features:
-1. **MindMap Enhancement**
-   - Modern UI with lazy loading
-   - Better animations
-   - Export functionality
+### 2. Backend (FastAPI)
 
-2. **Skill Gap Analyzer**
-   - Fix functionality
-   - Improve visualization
-   - Add recommendations
+\`\`\`bash
+# Navigate to backend
+cd backend
 
-3. **Skill Tree**
-   - Interactive tree visualization
-   - Progress tracking
-   - Unlock animations
+# Create virtual environment
+python -m venv venv
 
-4. **Study Planner**
-   - Calendar integration
-   - Smart scheduling
-   - Progress tracking
+# Activate virtual environment (Windows)
+venv\Scripts\activate
 
-5. **General Improvements**
-   - Lazy loading for heavy components
-   - Performance optimization
-   - Error boundaries
-   - Loading skeletons
+# Install dependencies
+pip install -r requirements.txt
 
----
+# Seed database
+python seed_db.py
 
-## 📝 Notes
+# Run server
+python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+\`\`\`
 
-- All components are fully typed with TypeScript
-- Accessibility features included (ARIA labels, keyboard navigation)
-- Mobile-first responsive design
-- Dark mode tested across all components
-- Speech features gracefully degrade if not supported
+Visit: **http://localhost:8002/docs** (API Documentation)
 
----
+## 📁 Project Structure
 
-## 🐛 Known Issues
-
-1. CSS linter warnings for `@apply` (false positive with Tailwind v4)
-2. Speech recognition requires HTTPS in production
-3. Some Solana package warnings (not affecting functionality)
-
----
-
-**Implementation Date**: October 30, 2025
-**Status**: Phase 1 & 2 Complete ✅
+\`\`\`
+mini_project/
+├── app/                      # Next.js Frontend
+│   ├── components/          # UI Components (Chat, Flashcards, etc.)
+│   ├── app/                 # App Router Pages
+│   └── lib/                 # Utilities
+├── backend/                 # FastAPI Backend
+│   ├── app/
+│   │   ├── api/            # API endpoints (Smart Recommendations, Doubt Solver)
+│   │   ├── core/           # Configuration
+│   │   ├── models/         # Database models
+│   │   └── services/       # RL Agent, RAG, & Gemini Client
+│   ├── main.py             # FastAPI app entry point
+│   └── seed_db.py          # Database seeding script
+├── personalized_learning_rl/ # RL Training & Environment
+│   ├── agents/             # PPO Agent Code
+│   ├── environment/        # Custom Gym Environment
+│   └── models/             # Trained DKT Models
+├── PROJECT_REPORT.md       # Detailed Project Report
+└── README.md              # This file
+\`\`\`
+'''

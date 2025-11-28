@@ -98,24 +98,39 @@ async def ask_doubt(
             query_embedding=query_embedding,
             top_k=request.context_limit,
             subject_filter=request.subject,
-            min_score=0.7
+            min_score=0.6
         )
         
+        system_instruction = JEEPromptTemplates.DOUBT_SOLVER_SYSTEM
+        context = ""
+
         if not search_results:
-            return DoubtResponse(
-                answer="I couldn't find relevant information in the study materials to answer this question. Please try rephrasing or ask about a different topic.",
-                confidence=0.0,
-                sources=[]
-            )
-        
-        # Step 3: Format context
-        context = JEEPromptTemplates.format_context(search_results)
+            # Fallback to general knowledge if no context found
+            logger.info("No relevant context found. Falling back to general knowledge.")
+            context = "No specific study material context available. Answer based on general JEE knowledge."
+            
+            # Override system instruction to allow general knowledge
+            system_instruction = """You are an expert JEE (Joint Entrance Examination) tutor specializing in Physics, Chemistry, and Mathematics.
+            
+            Your responsibilities:
+            1. Answer the student's question using your expert knowledge.
+            2. Provide step-by-step explanations for problems.
+            3. Use clear, exam-oriented language suitable for JEE aspirants.
+            4. Focus on conceptual clarity and problem-solving techniques.
+            
+            Important:
+            - Since no specific study material context was found, rely on your general knowledge.
+            - Ensure accuracy and relevance to the JEE syllabus.
+            """
+        else:
+            # Step 3: Format context
+            context = JEEPromptTemplates.format_context(search_results)
         
         # Step 4: Generate answer using LLM
         answer = llm_client.generate_with_context(
             question=request.question,
             context=context,
-            system_instruction=JEEPromptTemplates.DOUBT_SOLVER_SYSTEM
+            system_instruction=system_instruction
         )
         
         # Step 5: Prepare response with sources

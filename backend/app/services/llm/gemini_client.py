@@ -167,8 +167,6 @@ Context:
 {context}
 
 Question: {question}
-
-Answer based ONLY on the context above.
 """
         return self.generate(prompt)
 

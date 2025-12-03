@@ -177,3 +177,83 @@
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+/* Mind Map Enhancements */
+.react-flow__node {
+  cursor: grab !important;
+  transition: all 0.3s ease;
+}
+
+.react-flow__node:active {
+  cursor: grabbing !important;
+}
+
+.react-flow__node.selected {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5) !important;
+}
+
+.react-flow__edge-path {
+  stroke-dasharray: 8, 4;
+  animation: dash 0.8s linear infinite;
+  transition: stroke 0.3s ease;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+.react-flow__edge.animated path {
+  stroke-dasharray: 8, 4;
+  animation: dash 0.7s linear infinite;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke-width: 3.5 !important;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.react-flow__controls {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  background: white !important;
+  transition: all 0.3s ease !important;
+}
+
+.react-flow__controls button {
+  border-bottom: 1px solid #e2e8f0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.react-flow__controls button:hover {
+  background: #f1f5f9 !important;
+  transform: scale(1.05);
+}
+
+.react-flow__background {
+  transition: background-color 0.3s ease !important;
+}
+
+.react-flow__viewport {
+  transition: transform 0.3s ease-out;
+}
+
+/* Dark Mode Support */
+.dark .react-flow__node {
+  filter: brightness(0.9);
+}
+
+.dark .react-flow__controls {
+  background: #1e293b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .react-flow__controls button {
+  border-bottom-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .react-flow__controls button:hover {
+  background: #334155 !important;
+}

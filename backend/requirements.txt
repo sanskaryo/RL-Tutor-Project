@@ -47,3 +47,8 @@ gymnasium
 shimmy
 tensorflow
 torch
+transformers
+sentence-transformers
+accelerate
+bert-score
+textstat

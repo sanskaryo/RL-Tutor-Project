@@ -24,8 +24,12 @@ try:
     from environment.question_selection_env_main import QuestionSelectionEnv
 except ImportError as e:
     logger.error(f"Error importing RL modules: {e}")
-    # Fallback for development if paths are wrong or dependencies missing
+    # Store the error to show it to the user
+    IMPORT_ERROR = str(e)
     QuestionSelectionEnv = None
+else:
+    IMPORT_ERROR = None
+
 
 router = APIRouter()
 
@@ -43,6 +47,7 @@ class StartSessionRequest(BaseModel):
 # Load resources once on startup
 QUESTIONS_PATH = os.path.join(RL_PATH, "data/questions.csv")
 MODEL_PATH = os.path.join(RL_PATH, "models/teacher/ppo_teacher_agent.zip")
+STUDENT_MODEL_PATH = os.path.join(RL_PATH, "models/dkt_model_pretrained_seq50.keras")
 
 questions_df = None
 teacher_model = None
@@ -78,19 +83,25 @@ async def start_session(req: StartSessionRequest):
             raise HTTPException(status_code=500, detail="Question bank not found. Please check server configuration.")
 
         if QuestionSelectionEnv is None:
-             raise HTTPException(status_code=500, detail="RL Environment module not loaded.")
+             raise HTTPException(status_code=500, detail=f"RL Environment module not loaded. Error: {IMPORT_ERROR}")
+
 
         session_id = str(uuid.uuid4())
         
         # Initialize the RL Environment for this user
         # Using parameters consistent with demo_session.py
+        logger.info(f"Initializing RL Env with model path: {STUDENT_MODEL_PATH}")
+        if not os.path.exists(STUDENT_MODEL_PATH):
+            logger.error(f"Student model file NOT found at: {STUDENT_MODEL_PATH}")
+        
         env = QuestionSelectionEnv(
             questions_df,
             max_steps=20,
             action_types=['skill', 'type'],
             w_improvement=100,
             w_answerability=50,
-            w_coverage=0.5
+            w_coverage=0.5,
+            lstm_model_path=STUDENT_MODEL_PATH
         )
         
         obs, _ = env.reset()
@@ -137,10 +148,10 @@ async def start_session(req: StartSessionRequest):
             "session_id": session_id,
             "question": {
                 "text": str(selected_question['question_text']),
-                "id": str(selected_question['question_id']),
+                "id": str(selected_question['id']),
                 "type": str(selected_question['question_type']),
                 "choices": choices,
-                "skill": str(selected_question['skill_name']) if 'skill_name' in selected_question else str(selected_question.get('skill', 'Unknown'))
+                "skill": str(selected_question['skill'])
             },
             "mastery": 0.5 # Initial mastery guess
         }
@@ -222,10 +233,10 @@ async def submit_answer(action: QuizAction):
             "done": bool(done or truncated),
             "next_question": {
                 "text": str(next_question['question_text']),
-                "id": str(next_question['question_id']),
+                "id": str(next_question.get('question_id', next_question.get('id'))),
                 "type": str(next_question['question_type']),
                 "choices": choices,
-                "skill": str(next_question['skill_name']) if 'skill_name' in next_question else str(next_question.get('skill', 'Unknown'))
+                "skill": str(next_question.get('skill_name', next_question.get('skill', 'Unknown')))
             } if not (done or truncated) else None
         }
     except HTTPException:

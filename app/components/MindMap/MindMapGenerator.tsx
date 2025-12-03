@@ -2,16 +2,16 @@
 
 import React, { useCallback, useMemo, useState, useRef } from "react";
 import ReactFlow, {
-  addEdge,
-  applyEdgeChanges,
-  applyNodeChanges,
-  Connection,
   Edge,
   Controls,
   Background,
   Node,
   MarkerType,
   ReactFlowInstance,
+  applyNodeChanges,
+  applyEdgeChanges,
+  OnNodesChange,
+  OnEdgesChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import dagre from "dagre";
@@ -76,21 +76,21 @@ const getDagreLayout = (
   edges: Edge[],
   direction: "LR" | "TB" = "LR"
 ) => {
-  const nodeWidth = 280;
+  const nodeWidth = 240;
   const nodeHeight = 100;
 
   dagreGraph.setGraph({
     rankdir: direction,
-    nodesep: 60,
-    ranksep: 120,
-    marginx: 25,
-    marginy: 25,
+    nodesep: 40,
+    ranksep: 80,
+    marginx: 20,
+    marginy: 20,
   });
 
   nodes.forEach((n) =>
     dagreGraph.setNode(n.id, { width: nodeWidth, height: nodeHeight })
   );
-  edges.forEach((e) => dagreGraph.setEdge(e.source, e.target));
+  edges.forEach ((e) => dagreGraph.setEdge(e.source, e.target));
   dagre.layout(dagreGraph);
 
   const layoutedNodes = nodes.map((n) => {
@@ -101,15 +101,20 @@ const getDagreLayout = (
         x: nodeWithPosition.x - nodeWidth / 2,
         y: nodeWithPosition.y - nodeHeight / 2,
       },
+      style: {
+        ...n.style,
+        zIndex: 10,
+      },
     };
   });
 
-  edges = edges.map((e) => ({ ...e, type: "straight" }));
+  edges = edges.map((e) => ({ ...e, type: "smoothstep" }));
   return { nodes: layoutedNodes, edges };
 };
 
 // ---------------------- Custom Node Component ----------------------
-function CustomNodeContent({ data }: { data: MindMapNode }) {
+function CustomNodeContent({ data, isDarkMode }: { data: MindMapNode; isDarkMode?: boolean }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const color = SUBJECT_COLORS[data.subject || "default"];
   const badge =
     data.difficulty_level === "beginner"
@@ -120,70 +125,155 @@ function CustomNodeContent({ data }: { data: MindMapNode }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="w-[260px] bg-white border border-gray-200 rounded-xl shadow-sm"
-      style={{ borderLeft: `6px solid ${color}` }}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ 
+        opacity: 1, 
+        scale: 1,
+        width: isExpanded ? "340px" : "220px",
+      }}
+      transition={{ 
+        duration: 0.3,
+        type: "spring",
+        stiffness: 300,
+        damping: 25
+      }}
+      className={`border-2 rounded-lg shadow-lg hover:shadow-xl transition-all cursor-grab active:cursor-grabbing relative ${
+        isDarkMode 
+          ? "bg-slate-800 border-slate-600" 
+          : "bg-white border-gray-300"
+      }`}
+      style={{ 
+        borderLeft: `5px solid ${color}`,
+        zIndex: isExpanded ? 1000 : 10,
+      }}
     >
       <div className="p-3">
-        <h4 className="text-[15px] font-semibold text-slate-900 truncate">
+        <h4 className={`text-[13px] font-bold mb-1.5 leading-tight ${
+          isDarkMode ? "text-slate-100" : "text-slate-900"
+        }`} style={{ color }}>
           {data.label}
         </h4>
-        <p className="text-[12px] text-slate-600 mt-1 line-clamp-2">
+        <p className={`text-[11px] leading-snug line-clamp-2 ${
+          isDarkMode ? "text-slate-300" : "text-slate-600"
+        }`}>
           {data.summary}
         </p>
 
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
           <span
-            className={`text-[11px] px-2 py-1 rounded-full font-medium ${badge}`}
+            className={`text-[9px] px-2 py-0.5 rounded-full font-semibold ${badge}`}
           >
             {data.difficulty_level}
           </span>
           {data.subject && (
-            <span className="text-[11px] text-slate-500 bg-slate-100 px-2 py-1 rounded">
+            <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium ${
+              isDarkMode 
+                ? "text-slate-300 bg-slate-700" 
+                : "text-slate-600 bg-slate-200"
+            }`}>
               {data.subject}
             </span>
           )}
         </div>
 
-        <details className="mt-3 text-[13px]">
-          <summary className="cursor-pointer text-slate-700 font-medium">
+        <details
+          className="mt-2 text-[11px] group"
+          onToggle={(e) => setIsExpanded(e.currentTarget.open)}
+        >
+          <summary className={`cursor-pointer font-semibold transition-colors list-none flex items-center gap-1.5 text-[10px] ${
+            isDarkMode 
+              ? "text-slate-300 hover:text-slate-100" 
+              : "text-slate-700 hover:text-slate-900"
+          }`}>
+            <motion.span
+              animate={{ rotate: isExpanded ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-[8px]"
+            >
+              ▶
+            </motion.span>
             Details
           </summary>
-          <div className="mt-2 text-[13px] text-slate-700 space-y-2">
-            <p>{data.description}</p>
-            {data.examples && (
-              <ul className="list-disc list-inside text-[12px] text-slate-600">
-                {data.examples.map((ex, i) => (
-                  <li key={i}>{ex}</li>
-                ))}
-              </ul>
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 8 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                transition={{ duration: 0.25 }}
+                className={`text-[10px] space-y-2 max-h-48 overflow-y-auto pr-1 border-t pt-2 ${
+                  isDarkMode 
+                    ? "text-slate-300 border-slate-600" 
+                    : "text-slate-700 border-gray-200"
+                }`}
+              >
+                <p className={isDarkMode ? "text-slate-300 leading-snug" : "text-slate-600 leading-snug"}>
+                  {data.description}
+                </p>
+                {data.examples && data.examples.length > 0 && (
+                  <div className={`p-2 rounded ${
+                    isDarkMode ? "bg-slate-700" : "bg-slate-50"
+                  }`}>
+                    <p className={`font-semibold mb-1 flex items-center gap-1 text-[9px] ${
+                      isDarkMode ? "text-slate-200" : "text-slate-800"
+                    }`}>
+                      <span className="text-xs">💡</span> Examples:
+                    </p>
+                    <ul className={`list-disc list-inside text-[9px] space-y-0.5 pl-1 ${
+                      isDarkMode ? "text-slate-300" : "text-slate-600"
+                    }`}>
+                      {data.examples.map((ex, i) => (
+                        <li key={i} className="leading-snug line-clamp-1">
+                          {ex}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </details>
       </div>
     </motion.div>
   );
 }
 
-const nodeTypes = {
+// Create node types factory
+const createNodeTypes = (isDarkMode: boolean) => ({
   customNode: ({ data }: { data: MindMapNode }) => (
-    <CustomNodeContent data={data} />
+    <CustomNodeContent data={data} isDarkMode={isDarkMode} />
   ),
-};
+});
 
 // ---------------------- Main Component ----------------------
 export default function MindMapGenerator() {
   const [topic, setTopic] = useState("");
   const [subject, setSubject] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [mindmapData, setMindmapData] = useState<MindMapResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null);
   const [direction, setDirection] = useState<"LR" | "TB">("LR");
+
+  const nodeTypes = useMemo(() => createNodeTypes(isDarkMode), [isDarkMode]);
+
+  const onNodesChange: OnNodesChange = useCallback(
+    (changes) => {
+      setNodes((nds) => applyNodeChanges(changes, nds));
+    },
+    []
+  );
+
+  const onEdgesChange: OnEdgesChange = useCallback(
+    (changes) => {
+      setEdges((eds) => applyEdgeChanges(changes, eds));
+    },
+    []
+  );
 
   const suggestions = useMemo(
     () => [
@@ -202,7 +292,6 @@ export default function MindMapGenerator() {
   const clearGraph = useCallback(() => {
     setNodes([]);
     setEdges([]);
-    setMindmapData(null);
     setError(null);
   }, []);
 
@@ -216,32 +305,52 @@ export default function MindMapGenerator() {
       }));
 
       const flowEdges: Edge[] = data.edges.map((e) => {
-        const color =
-          e.relationship_type === "depends_on"
-            ? "#f59e0b"
-            : e.relationship_type === "prerequisite"
-            ? "#10b981"
-            : e.relationship_type === "application_of"
-            ? "#8b5cf6"
-            : "#3b82f6";
+        const colorMap = {
+          depends_on: "#f59e0b",
+          prerequisite: "#10b981",
+          application_of: "#8b5cf6",
+          default: "#3b82f6",
+        };
+        const color = colorMap[e.relationship_type as keyof typeof colorMap] || colorMap.default;
 
         return {
           id: e.id,
           source: e.source,
           target: e.target,
           label: e.label,
-          type: "straight",
-          markerEnd: { type: MarkerType.ArrowClosed, color },
-          style: { stroke: color, strokeWidth: 2.5 },
-          labelStyle: { fontSize: 12, fill: "#334155" },
+          type: "smoothstep",
+          markerEnd: { 
+            type: MarkerType.ArrowClosed, 
+            color,
+            width: 20,
+            height: 20,
+          },
+          animated: true,
+          style: {
+            stroke: color,
+            strokeWidth: 2.5,
+            strokeDasharray: "8, 4",
+          },
+          labelStyle: { 
+            fontSize: 10, 
+            fill: "#1e293b", 
+            fontWeight: 600,
+            background: "white",
+            padding: "2px 6px",
+            borderRadius: "3px",
+          },
+          labelBgPadding: [6, 3] as [number, number],
+          labelBgBorderRadius: 3,
+          labelBgStyle: { 
+            fill: "white", 
+            fillOpacity: 0.9,
+            stroke: color,
+            strokeWidth: 1,
+          },
         } as Edge;
       });
 
       const laid = getDagreLayout(flowNodes, flowEdges, direction);
-      laid.edges = laid.edges.map((e) => ({
-        ...e,
-        type: "straight",
-      }));
       return laid;
     },
     [direction]
@@ -273,20 +382,23 @@ export default function MindMapGenerator() {
       if (!data.nodes?.length) throw new Error("No nodes returned");
 
       const laid = convertToFlow(data);
-      setMindmapData(data);
       setNodes(laid.nodes);
       setEdges(laid.edges);
 
       setTimeout(
         () =>
           reactFlowInstanceRef.current?.fitView({
-            padding: 0.15,
-            includeHiddenNodes: true,
+            padding: 0.1,
+            includeHiddenNodes: false,
+            duration: 600,
+            maxZoom: 1,
           }),
-        100
+        150
       );
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: Error | unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to generate mind map";
+      setError(errorMessage);
       clearGraph();
     } finally {
       setIsLoading(false);
@@ -299,10 +411,17 @@ export default function MindMapGenerator() {
     const laid = getDagreLayout(nodes, edges, newDir);
     setNodes(laid.nodes);
     setEdges(laid.edges);
+    setTimeout(() => {
+      reactFlowInstanceRef.current?.fitView({
+        padding: 0.1,
+        duration: 600,
+        maxZoom: 1,
+      });
+    }, 100);
   };
 
   return (
-    <div className="h-[calc(100vh-5.5rem)] flex flex-col gap-4">
+    <div className="w-full h-[calc(100vh-5.5rem)] flex flex-col gap-4">
       <Card>
         <CardContent className="p-5">
           <div className="flex items-center gap-3">
@@ -378,10 +497,20 @@ export default function MindMapGenerator() {
         </CardContent>
       </Card>
 
-      <div className="flex-1 relative border rounded-lg overflow-hidden">
+      <div className={`flex-1 w-full relative border rounded-lg overflow-hidden transition-colors ${
+        isDarkMode ? "bg-slate-900" : "bg-white"
+      }`} style={{ minHeight: '400px' }}>
         <div className="absolute z-40 top-3 left-3 flex gap-2">
           <Card>
             <CardContent className="p-2 flex gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                title="Toggle Dark Mode"
+              >
+                {isDarkMode ? "☀️" : "🌙"}
+              </Button>
               <Button variant="ghost" size="icon" onClick={toggleDirection}>
                 <Maximize2 size={16} />
               </Button>
@@ -422,13 +551,45 @@ export default function MindMapGenerator() {
               nodes={nodes}
               edges={edges}
               nodeTypes={nodeTypes}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              nodesDraggable={true}
+              nodesConnectable={false}
+              elementsSelectable={true}
               fitView
-              onInit={(rfi) => (reactFlowInstanceRef.current = rfi)}
-              attributionPosition={null}
+              fitViewOptions={{
+                padding: 0.1,
+                includeHiddenNodes: false,
+                minZoom: 0.8,
+                maxZoom: 1.2,
+              }}
+              minZoom={0.5}
+              maxZoom={1.5}
+              defaultEdgeOptions={{
+                animated: true,
+                type: "smoothstep",
+              }}
+              onInit={(rfi) => {
+                reactFlowInstanceRef.current = rfi;
+                setTimeout(() => rfi.fitView({ padding: 0.1, duration: 600, maxZoom: 1 }), 100);
+              }}
               style={{ width: "100%", height: "100%" }}
             >
-              <Controls showInteractive={true} />
-              <Background color="#e5e7eb" gap={20} />
+              <Controls 
+                showInteractive={true}
+                showZoom={true}
+                showFitView={true}
+                position="top-left"
+              />
+              <Background 
+                color={isDarkMode ? "#475569" : "#cbd5e1"}
+                gap={16} 
+                size={1}
+                style={{ 
+                  backgroundColor: isDarkMode ? "#1e293b" : "#f8fafc",
+                  transition: "all 0.3s ease"
+                }}
+              />
             </ReactFlow>
           ) : (
             <div className="h-full flex items-center justify-center">

@@ -45,6 +45,7 @@ export default function Sidebar({ children }: SidebarProps) {
         { name: 'Achievements', href: '/achievements', icon: Award },
         { name: 'Study Plan', href: '/study-plan', icon: Calendar },
         { name: 'RL Viz', href: '/rl-viz', icon: Brain },
+        { name: 'AI Quiz', href: '/quiz', icon: Brain },
         { name: 'Learning Style', href: '/learning-style-quiz', icon: Sparkles },
         { name: 'Doubt Solver', href: '/doubt-solver', icon: Brain },
         { name: 'Mind Map', href: '/mindmap', icon: Brain },

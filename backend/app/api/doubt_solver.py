@@ -48,16 +48,14 @@ def get_rag_services():
     try:
         # Get API key from settings
         gemini_api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        mongodb_uri = getattr(settings, 'MONGODB_URI', None)
         
         if not gemini_api_key:
             raise ValueError("GEMINI_API_KEY not configured in settings")
-        if not mongodb_uri:
-            raise ValueError("MONGODB_URI not configured in settings")
         
         # Initialize services
         embedder = GeminiEmbedder(api_key=gemini_api_key)
-        retriever = VectorRetriever(mongodb_uri=mongodb_uri)
+        # Use FAISS-based retriever (no MongoDB URI needed)
+        retriever = VectorRetriever() 
         llm_client = GeminiClient(api_key=gemini_api_key)
         
         return {
@@ -91,14 +89,15 @@ async def ask_doubt(
         
         # Step 1: Embed the question
         logger.info(f"Processing question: {request.question[:50]}...")
-        query_embedding = embedder.embed_query(request.question)
+        # Use retrieval_query task type for better matching
+        query_embedding = embedder.embed_text(request.question, task_type="retrieval_query")
         
         # Step 2: Retrieve relevant context
         search_results = retriever.search(
             query_embedding=query_embedding,
             top_k=request.context_limit,
             subject_filter=request.subject,
-            min_score=0.6
+            min_score=0.0 # FAISS distance/score handling
         )
         
         system_instruction = JEEPromptTemplates.DOUBT_SOLVER_SYSTEM
